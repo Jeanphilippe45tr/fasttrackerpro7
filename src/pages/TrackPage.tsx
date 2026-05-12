@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Search, Package, MapPin, Clock, AlertCircle, CheckCircle, Pause, MessageSquare, Download, FileText } from 'lucide-react';
+import { Search, Package, MapPin, Clock, AlertCircle, CheckCircle, Pause, MessageSquare, Download, FileText, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import TrackingMap from '@/components/TrackingMap';
 import { useApp } from '@/context/AppContext';
-import type { Shipment } from '@/context/AppContext';
+import type { Shipment, Ticket } from '@/context/AppContext';
 import ChatWidget from '@/components/ChatWidget';
 import { generateTicketPdf } from '@/lib/ticketPdf';
+import TicketPreview from '@/components/TicketPreview';
 import { Badge as Bdg } from '@/components/ui/badge';
 
 const statusConfig: Record<string, { color: string; icon: React.ElementType; label: string }> = {
@@ -26,6 +27,7 @@ const TrackPage: React.FC = () => {
   const [shipment, setShipment] = useState<Shipment | null>(null);
   const [notFound, setNotFound] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
+  const [previewTicket, setPreviewTicket] = useState<Ticket | null>(null);
   const { getShipmentByTracking, loading, getTicketsForShipment, messages } = useApp();
 
   const tickets = shipment ? getTicketsForShipment(shipment.id) : [];
