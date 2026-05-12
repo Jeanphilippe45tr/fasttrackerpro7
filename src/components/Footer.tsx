@@ -19,6 +19,8 @@ const Footer: React.FC = () => (
           <div className="space-y-2 text-sm opacity-80">
             <Link to="/track" className="block hover:opacity-100 transition-opacity">Track Package</Link>
             <Link to="/services" className="block hover:opacity-100 transition-opacity">Services</Link>
+            <Link to="/coverage" className="block hover:opacity-100 transition-opacity">Global Coverage</Link>
+            <Link to="/pricing" className="block hover:opacity-100 transition-opacity">Pricing</Link>
             <Link to="/reviews" className="block hover:opacity-100 transition-opacity">Reviews</Link>
             <Link to="/faq" className="block hover:opacity-100 transition-opacity">FAQ</Link>
             <Link to="/about" className="block hover:opacity-100 transition-opacity">About Us</Link>

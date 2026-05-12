@@ -14,6 +14,10 @@ import AdminChat from "./pages/AdminChat";
 import ServicesPage from "./pages/ServicesPage";
 import AboutPage from "./pages/AboutPage";
 import ContactPage from "./pages/ContactPage";
+import ReviewsPage from "./pages/ReviewsPage";
+import FaqPage from "./pages/FaqPage";
+import PricingPage from "./pages/PricingPage";
+import CoveragePage from "./pages/CoveragePage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -32,6 +36,10 @@ const App = () => (
             <Route path="/services" element={<ServicesPage />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/contact" element={<ContactPage />} />
+            <Route path="/reviews" element={<ReviewsPage />} />
+            <Route path="/faq" element={<FaqPage />} />
+            <Route path="/pricing" element={<PricingPage />} />
+            <Route path="/coverage" element={<CoveragePage />} />
             <Route path="/admin/login" element={<AdminLogin />} />
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/admin/chat" element={<AdminChat />} />

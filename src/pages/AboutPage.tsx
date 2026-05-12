@@ -1,8 +1,11 @@
 import React from 'react';
 import { Users, Award, Globe, Target, TrendingUp, Heart } from 'lucide-react';
+import { useReveal } from '@/hooks/use-reveal';
 import heroImg from '@/assets/hero-logistics.jpg';
 
-const AboutPage: React.FC = () => (
+const AboutPage: React.FC = () => {
+  useReveal();
+  return (
   <div className="min-h-screen bg-muted/30">
     {/* Hero */}
     <section className="relative py-16 md:py-24 overflow-hidden">
@@ -11,14 +14,14 @@ const AboutPage: React.FC = () => (
         <div className="absolute inset-0 bg-primary/85" />
       </div>
       <div className="container mx-auto px-4 relative text-center">
-        <h1 className="text-4xl md:text-5xl font-bold text-primary-foreground mb-4">About FastTrackerPro</h1>
-        <p className="text-primary-foreground/80 max-w-2xl mx-auto text-lg">Your trusted partner in global logistics since 2010. Connecting businesses and people across 200+ countries.</p>
+        <h1 className="text-4xl md:text-5xl font-bold text-primary-foreground mb-4 animate-fade-in">About FastTrackerPro</h1>
+        <p className="text-primary-foreground/80 max-w-2xl mx-auto text-lg animate-fade-in" style={{ animationDelay: '120ms' }}>Your trusted partner in global logistics since 2010. Connecting businesses and people across 200+ countries.</p>
       </div>
     </section>
 
     <div className="container mx-auto px-4 max-w-5xl py-16">
       {/* Story */}
-      <div className="mb-16">
+      <div className="mb-16 reveal">
         <h2 className="text-2xl font-bold text-foreground mb-4">Our Story</h2>
         <div className="space-y-4 text-muted-foreground leading-relaxed">
           <p>Founded in 2010 by a team of logistics veterans and technology innovators, FastTrackerPro was born from a simple idea: shipping should be transparent, reliable, and accessible to everyone.</p>
@@ -37,7 +40,7 @@ const AboutPage: React.FC = () => (
           { icon: TrendingUp, title: 'Innovation', desc: 'Investing over $20M annually in R&D. Our AI-powered route optimization reduces transit times by up to 30% while cutting carbon emissions.' },
           { icon: Heart, title: 'Sustainability', desc: 'Committed to carbon-neutral operations by 2028. Electric vehicle fleet deployment in 15+ cities. Eco-friendly packaging programs for all clients.' },
         ].map((item, i) => (
-          <div key={i} className="flex gap-4 p-6 rounded-xl bg-card border border-border shadow-card">
+          <div key={i} className="reveal hover-lift flex gap-4 p-6 rounded-xl bg-card border border-border shadow-card" style={{ transitionDelay: `${i * 80}ms` }}>
             <div className="w-12 h-12 rounded-lg gradient-primary flex items-center justify-center shrink-0">
               <item.icon className="w-6 h-6 text-primary-foreground" />
             </div>
@@ -50,7 +53,7 @@ const AboutPage: React.FC = () => (
       </div>
 
       {/* Stats */}
-      <div className="gradient-primary rounded-2xl p-8 md:p-12">
+      <div className="gradient-primary rounded-2xl p-8 md:p-12 reveal">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
           {[
             { value: '15+', label: 'Years of Experience' },
@@ -67,6 +70,7 @@ const AboutPage: React.FC = () => (
       </div>
     </div>
   </div>
-);
+  );
+};
 
 export default AboutPage;

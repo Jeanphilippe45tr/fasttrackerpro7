@@ -4,6 +4,8 @@ import { Package, Search, Truck, Globe, Clock, Shield, ArrowRight, MapPin, Check
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import PartnerLogos from '@/components/PartnerLogos';
+import LogisticsScene from '@/components/LogisticsScene';
+import { useReveal } from '@/hooks/use-reveal';
 import heroImg from '@/assets/hero-logistics.jpg';
 import warehouseImg from '@/assets/warehouse.jpg';
 import truckImg from '@/assets/delivery-truck.jpg';
@@ -11,6 +13,7 @@ import truckImg from '@/assets/delivery-truck.jpg';
 const Index: React.FC = () => {
   const [tracking, setTracking] = useState('');
   const navigate = useNavigate();
+  useReveal();
 
   const handleTrack = (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,18 +46,19 @@ const Index: React.FC = () => {
           <div className="absolute inset-0 bg-primary/80" />
         </div>
         <div className="container mx-auto px-4 relative">
-          <div className="max-w-3xl mx-auto text-center">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-secondary/20 text-secondary mb-6 text-sm font-medium border border-secondary/30">
+          <div className="grid lg:grid-cols-2 gap-10 items-center">
+            <div className="text-center lg:text-left animate-fade-in-left">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-secondary/20 text-secondary mb-6 text-sm font-medium border border-secondary/30 animate-fade-in">
               <Package className="w-4 h-4" /> Trusted by 50,000+ businesses globally
             </div>
-            <h1 className="text-4xl md:text-6xl font-bold text-primary-foreground mb-6 leading-tight">
+            <h1 className="text-4xl md:text-6xl font-bold text-primary-foreground mb-6 leading-tight animate-fade-in" style={{ animationDelay: '120ms' }}>
               Ship Faster. <br />Track <span className="text-secondary">Smarter.</span>
             </h1>
-            <p className="text-lg md:text-xl text-primary-foreground/80 mb-10 max-w-2xl mx-auto">
+            <p className="text-lg md:text-xl text-primary-foreground/80 mb-10 max-w-2xl lg:mx-0 mx-auto animate-fade-in" style={{ animationDelay: '240ms' }}>
               FastTrackerPro delivers end-to-end logistics solutions with real-time GPS tracking, intelligent route optimization, and 24/7 dedicated support across 200+ countries.
             </p>
 
-            <form onSubmit={handleTrack} className="max-w-xl mx-auto flex gap-2">
+            <form onSubmit={handleTrack} className="max-w-xl lg:mx-0 mx-auto flex gap-2 animate-fade-in" style={{ animationDelay: '360ms' }}>
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                 <Input
@@ -64,10 +68,14 @@ const Index: React.FC = () => {
                   className="pl-10 h-12 bg-card text-foreground border-0 shadow-lg"
                 />
               </div>
-              <Button type="submit" className="h-12 px-6 bg-secondary text-secondary-foreground hover:bg-secondary/90 font-semibold">
+              <Button type="submit" className="h-12 px-6 bg-secondary text-secondary-foreground hover:bg-secondary/90 font-semibold hover-lift">
                 Track <ArrowRight className="w-4 h-4 ml-1" />
               </Button>
             </form>
+            </div>
+            <div className="hidden lg:block animate-fade-in-right">
+              <LogisticsScene />
+            </div>
           </div>
         </div>
       </section>
@@ -77,13 +85,13 @@ const Index: React.FC = () => {
       {/* Features */}
       <section className="py-20">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
+          <div className="text-center mb-12 reveal">
             <h2 className="text-3xl font-bold text-foreground mb-3">Why Choose FastTrackerPro?</h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">From pickup to delivery, we provide comprehensive logistics solutions designed for modern businesses of all sizes.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {features.map((f, i) => (
-              <div key={i} className="p-6 rounded-xl bg-card border border-border shadow-card hover:shadow-lg transition-shadow group">
+              <div key={i} className="reveal hover-lift p-6 rounded-xl bg-card border border-border shadow-card group" style={{ transitionDelay: `${i * 80}ms` }}>
                 <div className="w-12 h-12 rounded-lg gradient-primary flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                   <f.icon className="w-6 h-6 text-primary-foreground" />
                 </div>
@@ -98,7 +106,7 @@ const Index: React.FC = () => {
       {/* How It Works with images */}
       <section className="py-20 bg-muted/30">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
+          <div className="text-center mb-12 reveal">
             <h2 className="text-3xl font-bold text-foreground mb-3">How It Works</h2>
             <p className="text-muted-foreground">Three simple steps to ship your packages worldwide</p>
           </div>
