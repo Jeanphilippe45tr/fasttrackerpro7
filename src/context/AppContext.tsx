@@ -60,6 +60,10 @@ export interface Ticket {
   issuedTo: string;
   issuedBy: string;
   createdAt: string;
+  dueDate?: string;
+  paymentMethod?: string;
+  taxRate?: number;
+  discount?: number;
 }
 
 interface AppState {
@@ -151,6 +155,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         issuedTo: t.issued_to || '',
         issuedBy: t.issued_by || 'FastTrackerPro Admin',
         createdAt: t.created_at,
+        dueDate: t.due_date || undefined,
+        paymentMethod: t.payment_method || '',
+        taxRate: Number(t.tax_rate || 0),
+        discount: Number(t.discount || 0),
       })));
       setLoading(false);
     };
@@ -186,6 +194,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             ticketType: t.ticket_type, title: t.title, amount: Number(t.amount),
             currency: t.currency, items: t.items || [], notes: t.notes || '',
             issuedTo: t.issued_to || '', issuedBy: t.issued_by || '', createdAt: t.created_at,
+            dueDate: t.due_date || undefined, paymentMethod: t.payment_method || '',
+            taxRate: Number(t.tax_rate || 0), discount: Number(t.discount || 0),
           }, ...prev]);
         } else if (payload.eventType === 'DELETE') {
           setTickets(prev => prev.filter(x => x.id !== (payload.old as any).id));
@@ -284,6 +294,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       notes: ticket.notes,
       issued_to: ticket.issuedTo,
       issued_by: ticket.issuedBy,
+      due_date: ticket.dueDate || null,
+      payment_method: ticket.paymentMethod || '',
+      tax_rate: ticket.taxRate || 0,
+      discount: ticket.discount || 0,
     });
   }, []);
 
