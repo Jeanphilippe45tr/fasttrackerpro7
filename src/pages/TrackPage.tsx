@@ -203,10 +203,16 @@ const TrackPage: React.FC = () => {
                           <div className="text-xs text-muted-foreground font-mono">{t.ticketNumber} · {t.currency} {t.amount.toFixed(2)}</div>
                           {t.notes && <div className="text-xs text-muted-foreground mt-1">{t.notes}</div>}
                         </div>
-                        <Button size="sm" variant="outline" className="gap-1"
-                          onClick={() => generateTicketPdf(t, { trackingNumber: shipment.trackingNumber, origin: shipment.origin, destination: shipment.destination, clientName: shipment.clientName })}>
-                          <Download className="w-4 h-4" /> PDF
-                        </Button>
+                        <div className="flex gap-1">
+                          <Button size="sm" variant="outline" className="gap-1"
+                            onClick={() => setPreviewTicket(t)}>
+                            <Eye className="w-4 h-4" /> View
+                          </Button>
+                          <Button size="sm" className="gap-1 bg-secondary text-secondary-foreground hover:bg-secondary/90"
+                            onClick={() => generateTicketPdf(t, { trackingNumber: shipment.trackingNumber, origin: shipment.origin, destination: shipment.destination, clientName: shipment.clientName }).catch(console.error)}>
+                            <Download className="w-4 h-4" /> PDF
+                          </Button>
+                        </div>
                       </div>
                     ))}
                   </CardContent>
@@ -214,6 +220,9 @@ const TrackPage: React.FC = () => {
               )}
 
               {chatOpen && <ChatWidget shipmentId={shipment.id} senderRole="client" />}
+              <TicketPreview ticket={previewTicket}
+                shipmentInfo={{ trackingNumber: shipment.trackingNumber, origin: shipment.origin, destination: shipment.destination, clientName: shipment.clientName }}
+                open={!!previewTicket} onClose={() => setPreviewTicket(null)} />
             </div>
           )}
         </div>
