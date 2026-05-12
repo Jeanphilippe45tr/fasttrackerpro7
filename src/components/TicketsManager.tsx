@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Trash2, Download, FileText, Receipt } from 'lucide-react';
+import { Plus, Trash2, Download, FileText, Receipt, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useApp } from '@/context/AppContext';
 import type { Ticket, TicketItem, Shipment } from '@/context/AppContext';
 import { generateTicketPdf } from '@/lib/ticketPdf';
+import TicketPreview from './TicketPreview';
 import { useToast } from '@/hooks/use-toast';
 
 interface Props {
@@ -23,18 +24,27 @@ const TicketsManager: React.FC<Props> = ({ shipment }) => {
   const { tickets, addTicket, deleteTicket } = useApp();
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
+  const [previewTicket, setPreviewTicket] = useState<Ticket | null>(null);
+
   const [type, setType] = useState<'paid' | 'pending'>('paid');
   const [title, setTitle] = useState('Transit Fee');
   const [currency, setCurrency] = useState('USD');
   const [notes, setNotes] = useState('');
   const [items, setItems] = useState<TicketItem[]>([{ description: 'Transit fee', amount: 0 }]);
+  const [dueDate, setDueDate] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState('');
+  const [taxRate, setTaxRate] = useState(0);
+  const [discount, setDiscount] = useState(0);
 
   const shipmentTickets = tickets.filter(t => t.shipmentId === shipment.id);
-  const total = items.reduce((s, i) => s + (Number(i.amount) || 0), 0);
+  const subtotal = items.reduce((s, i) => s + (Number(i.amount) || 0), 0);
+  const taxAmt = Math.max(0, subtotal - discount) * (taxRate / 100);
+  const total = Math.max(0, subtotal - discount) + taxAmt;
 
   const reset = () => {
     setType('paid'); setTitle('Transit Fee'); setCurrency('USD'); setNotes('');
     setItems([{ description: 'Transit fee', amount: 0 }]);
+    setDueDate(''); setPaymentMethod(''); setTaxRate(0); setDiscount(0);
   };
 
   const handleCreate = () => {
@@ -44,25 +54,35 @@ const TicketsManager: React.FC<Props> = ({ shipment }) => {
       ticketNumber: newTicketNumber(type),
       ticketType: type,
       title: title || (type === 'paid' ? 'Payment Receipt' : 'Pending Payment'),
-      amount: total,
+      amount: Number(total.toFixed(2)),
       currency,
       items: items.filter(i => i.description.trim()),
       notes,
       issuedTo: shipment.clientName,
       issuedBy: 'FastTrackerPro Admin',
       createdAt: new Date().toISOString(),
+      dueDate: dueDate || undefined,
+      paymentMethod,
+      taxRate,
+      discount,
     };
     addTicket(ticket);
     toast({ title: 'Ticket created', description: ticket.ticketNumber });
     setOpen(false); reset();
+    setPreviewTicket(ticket);
   };
 
-  const download = (t: Ticket) => generateTicketPdf(t, {
+  const shipmentInfo = {
     trackingNumber: shipment.trackingNumber,
     origin: shipment.origin,
     destination: shipment.destination,
     clientName: shipment.clientName,
-  });
+  };
+
+  const download = async (t: Ticket) => {
+    try { await generateTicketPdf(t, shipmentInfo); }
+    catch (e) { console.error(e); toast({ title: 'PDF error', description: String(e), variant: 'destructive' }); }
+  };
 
   return (
     <Card>
@@ -75,7 +95,7 @@ const TicketsManager: React.FC<Props> = ({ shipment }) => {
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
-            <DialogHeader><DialogTitle>Create Ticket</DialogTitle></DialogHeader>
+            <DialogHeader><DialogTitle>Create Professional Ticket</DialogTitle></DialogHeader>
             <div className="space-y-3">
               <div className="grid grid-cols-2 gap-3">
                 <div>
@@ -84,19 +104,32 @@ const TicketsManager: React.FC<Props> = ({ shipment }) => {
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="paid">Payment Receipt (Paid)</SelectItem>
-                      <SelectItem value="pending">Pending Payment (Due)</SelectItem>
+                      <SelectItem value="pending">Invoice (Due)</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div>
                   <label className="text-sm font-medium">Currency</label>
-                  <Input value={currency} onChange={e => setCurrency(e.target.value)} />
+                  <Select value={currency} onValueChange={setCurrency}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {['USD','EUR','GBP','XAF','XOF','CAD','AUD','JPY','CNY','BRL'].map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
               <div>
                 <label className="text-sm font-medium">Title</label>
                 <Input value={title} onChange={e => setTitle(e.target.value)} placeholder="e.g. Transit Fee Receipt" />
               </div>
+
+              {type === 'pending' && (
+                <div>
+                  <label className="text-sm font-medium">Due Date</label>
+                  <Input type="date" value={dueDate} onChange={e => setDueDate(e.target.value)} />
+                </div>
+              )}
+
               <div>
                 <label className="text-sm font-medium">Items</label>
                 <div className="space-y-2 mt-1">
@@ -115,13 +148,40 @@ const TicketsManager: React.FC<Props> = ({ shipment }) => {
                     <Plus className="w-3 h-3 mr-1" /> Add line
                   </Button>
                 </div>
-                <div className="text-right text-sm font-semibold mt-2">Total: {currency} {total.toFixed(2)}</div>
               </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-sm font-medium">Discount</label>
+                  <Input type="number" value={discount} onChange={e => setDiscount(Number(e.target.value) || 0)} />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Tax %</label>
+                  <Input type="number" value={taxRate} onChange={e => setTaxRate(Number(e.target.value) || 0)} />
+                </div>
+              </div>
+
+              <div className="rounded-lg bg-muted/50 p-3 space-y-1 text-sm">
+                <div className="flex justify-between"><span>Subtotal</span><span>{currency} {subtotal.toFixed(2)}</span></div>
+                {discount > 0 && <div className="flex justify-between text-destructive"><span>Discount</span><span>- {currency} {discount.toFixed(2)}</span></div>}
+                {taxRate > 0 && <div className="flex justify-between"><span>Tax ({taxRate}%)</span><span>{currency} {taxAmt.toFixed(2)}</span></div>}
+                <div className="flex justify-between font-bold text-base pt-1 border-t"><span>Total</span><span className="text-secondary">{currency} {total.toFixed(2)}</span></div>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium">{type === 'paid' ? 'Payment Method' : 'Payment Instructions'}</label>
+                <Textarea value={paymentMethod} onChange={e => setPaymentMethod(e.target.value)}
+                  placeholder={type === 'paid' ? 'e.g. Bank Transfer, Card ending 4242' : 'e.g. Bank: ABC Bank · IBAN: ...'} rows={2} />
+              </div>
+
               <div>
                 <label className="text-sm font-medium">Notes</label>
-                <Textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder="Payment instructions, deadlines..." rows={3} />
+                <Textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder="Additional notes..." rows={2} />
               </div>
-              <Button onClick={handleCreate} className="w-full bg-secondary text-secondary-foreground hover:bg-secondary/90">Create & Save</Button>
+
+              <Button onClick={handleCreate} className="w-full bg-secondary text-secondary-foreground hover:bg-secondary/90">
+                Create Ticket
+              </Button>
             </div>
           </DialogContent>
         </Dialog>
@@ -146,10 +206,13 @@ const TicketsManager: React.FC<Props> = ({ shipment }) => {
                   </div>
                 </div>
                 <div className="flex gap-1">
-                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => download(t)}>
+                  <Button variant="ghost" size="icon" className="h-8 w-8" title="Preview" onClick={() => setPreviewTicket(t)}>
+                    <Eye className="w-4 h-4" />
+                  </Button>
+                  <Button variant="ghost" size="icon" className="h-8 w-8" title="Download PDF" onClick={() => download(t)}>
                     <Download className="w-4 h-4" />
                   </Button>
-                  <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => deleteTicket(t.id)}>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" title="Delete" onClick={() => deleteTicket(t.id)}>
                     <Trash2 className="w-4 h-4" />
                   </Button>
                 </div>
@@ -158,6 +221,9 @@ const TicketsManager: React.FC<Props> = ({ shipment }) => {
           </div>
         )}
       </CardContent>
+
+      <TicketPreview ticket={previewTicket} shipmentInfo={shipmentInfo}
+        open={!!previewTicket} onClose={() => setPreviewTicket(null)} />
     </Card>
   );
 };
