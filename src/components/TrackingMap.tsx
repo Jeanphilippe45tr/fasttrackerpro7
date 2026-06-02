@@ -7,10 +7,11 @@ interface TrackingMapProps {
   destCoords: [number, number] | null;
   currentCoords: [number, number] | null;
   route?: [number, number][];
+  transportMode?: 'road' | 'sea' | 'air' | 'rail';
   className?: string;
 }
 
-const TrackingMap: React.FC<TrackingMapProps> = ({ originCoords, destCoords, currentCoords, route, className }) => {
+const TrackingMap: React.FC<TrackingMapProps> = ({ originCoords, destCoords, currentCoords, route, transportMode = 'road', className }) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<L.Map | null>(null);
 
@@ -66,9 +67,15 @@ const TrackingMap: React.FC<TrackingMapProps> = ({ originCoords, destCoords, cur
       bounds.push(currentCoords);
     }
 
+    // Color & style per transport mode
+    const modeColor: Record<string, string> = { road: '#1e3a5f', sea: '#0ea5e9', air: '#8b5cf6', rail: '#16a34a' };
+    const baseColor = modeColor[transportMode] || '#1e3a5f';
+    // Air & sea travel in straight (great-circle style) lines; road & rail follow land routes
+    const usesRoadRouting = transportMode === 'road' || transportMode === 'rail';
+
     // Draw straight line immediately for instant visual feedback
     if (originCoords && destCoords) {
-      L.polyline([originCoords, destCoords], { color: '#1e3a5f', weight: 3, opacity: 0.3, dashArray: '10, 5' }).addTo(map);
+      L.polyline([originCoords, destCoords], { color: baseColor, weight: 3, opacity: usesRoadRouting ? 0.3 : 0.7, dashArray: '10, 5' }).addTo(map);
       if (currentCoords) {
         L.polyline([originCoords, currentCoords], { color: '#f97316', weight: 4, opacity: 0.8 }).addTo(map);
       }
@@ -80,8 +87,9 @@ const TrackingMap: React.FC<TrackingMapProps> = ({ originCoords, destCoords, cur
       map.setView([20, 0], 2);
     }
 
-    // Fetch real route from OSRM in background (non-blocking)
-    if (originCoords && destCoords) {
+    // Fetch real road/rail route from OSRM in background (non-blocking).
+    // Air & sea keep the direct line drawn above (no land routing).
+    if (originCoords && destCoords && usesRoadRouting) {
       const controller = new AbortController();
       const url = `https://router.project-osrm.org/route/v1/driving/${originCoords[1]},${originCoords[0]};${destCoords[1]},${destCoords[0]}?overview=full&geometries=geojson`;
       fetch(url, { signal: controller.signal })
@@ -94,7 +102,7 @@ const TrackingMap: React.FC<TrackingMapProps> = ({ originCoords, destCoords, cur
                 map.removeLayer(layer);
               }
             });
-            L.polyline(coords, { color: '#1e3a5f', weight: 3, opacity: 0.6, dashArray: '8, 4' }).addTo(map);
+            L.polyline(coords, { color: baseColor, weight: 3, opacity: 0.6, dashArray: '8, 4' }).addTo(map);
             if (currentCoords) {
               L.polyline([originCoords, currentCoords], { color: '#f97316', weight: 4, opacity: 0.9 }).addTo(map);
             }
@@ -117,7 +125,7 @@ const TrackingMap: React.FC<TrackingMapProps> = ({ originCoords, destCoords, cur
         mapInstance.current = null;
       }
     };
-  }, [originCoords, destCoords, currentCoords, route]);
+  }, [originCoords, destCoords, currentCoords, route, transportMode]);
 
   return <div ref={mapRef} className={`w-full rounded-lg overflow-hidden ${className || 'h-[400px]'}`} />;
 };
