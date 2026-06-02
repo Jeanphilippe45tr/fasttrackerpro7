@@ -136,10 +136,13 @@ const AdminDashboard: React.FC = () => {
       origin: form.origin, destination: form.destination,
       weight: form.weight, dimensions: form.dimensions,
       packageType: form.packageType, status: form.status, progress: form.progress,
+      transportMode: form.transportMode,
     };
 
     const existing = shipments.find(s => s.id === editId);
-    if (existing && (existing.destination !== form.destination || existing.origin !== form.origin)) {
+    const routeChanged = existing && (existing.destination !== form.destination || existing.origin !== form.origin);
+    const modeChanged = existing && existing.transportMode !== form.transportMode;
+    if (routeChanged) {
       // Destination changed - generate new tracking number
       updates.trackingNumber = generateTrackingNumber();
       updates.originCoords = await geocode(form.origin);
@@ -147,16 +150,7 @@ const AdminDashboard: React.FC = () => {
       updates.currentCoords = updates.originCoords;
       
       if (updates.originCoords && updates.destCoords) {
-        try {
-          const r = await fetch(`https://router.project-osrm.org/route/v1/driving/${updates.originCoords[1]},${updates.originCoords[0]};${updates.destCoords[1]},${updates.destCoords[0]}?overview=false`);
-          const data = await r.json();
-          if (data.routes?.[0]) {
-            const hours = Math.ceil(data.routes[0].duration / 3600);
-            const arrDate = new Date();
-            arrDate.setHours(arrDate.getHours() + hours);
-            updates.estimatedArrival = arrDate.toISOString().split('T')[0];
-          }
-        } catch {}
+        updates.estimatedArrival = await computeEta(updates.originCoords, updates.destCoords, form.transportMode);
       }
 
       updates.history = [...(existing.history || []), {
@@ -168,6 +162,9 @@ const AdminDashboard: React.FC = () => {
       }];
 
       toast({ title: 'Route Changed', description: `New tracking number: ${updates.trackingNumber}` });
+    } else if (modeChanged && existing?.originCoords && existing?.destCoords) {
+      // Recalculate ETA when only the transport mode changes
+      updates.estimatedArrival = await computeEta(existing.originCoords, existing.destCoords, form.transportMode);
     }
 
     updateShipment(editId, updates);
