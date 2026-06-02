@@ -22,6 +22,13 @@ const statusColors: Record<string, string> = {
   cancelled: 'bg-muted text-muted-foreground',
 };
 
+const modeLabels: Record<string, string> = {
+  road: '🚚 Road Freight',
+  sea: '🚢 Sea Freight',
+  air: '✈️ Air Freight',
+  rail: '🚆 Rail Freight',
+};
+
 const geocode = async (place: string): Promise<[number, number] | null> => {
   try {
     const r = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(place)}&limit=1`);
