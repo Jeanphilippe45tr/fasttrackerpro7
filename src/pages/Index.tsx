@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Package, Search, Truck, Globe, Clock, Shield, ArrowRight, MapPin, CheckCircle, Headphones } from 'lucide-react';
+import { Package, Search, Truck, Globe, Clock, Shield, ArrowRight, MapPin, CheckCircle, Headphones, Plane, Ship, Train, Warehouse, Boxes, Snowflake } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import PartnerLogos from '@/components/PartnerLogos';
@@ -29,6 +29,18 @@ const Index: React.FC = () => {
     { icon: Shield, title: 'Secure Shipping', desc: 'Full end-to-end cargo insurance up to $500,000. Temperature-controlled and hazardous material handling available.' },
     { icon: Package, title: 'Warehousing & Fulfillment', desc: 'Strategic warehouse locations in 30+ countries. Inventory management, pick-and-pack, and same-day dispatch services.' },
     { icon: MapPin, title: 'Last Mile Delivery', desc: 'Reliable last-mile delivery with proof of delivery photos, signature capture, and flexible rescheduling options for recipients.' },
+  ];
+
+  const freightModes = [
+    { icon: Plane, title: 'Air Freight', desc: 'Fast, reliable air cargo with priority customs clearance. Door-to-door and airport-to-airport options for time-critical shipments worldwide.' },
+    { icon: Truck, title: 'Road Freight', desc: 'Flexible FTL and LTL trucking across regional and cross-border routes with live GPS tracking and guaranteed delivery windows.' },
+    { icon: Ship, title: 'Sea Freight', desc: 'Cost-effective ocean shipping for large volumes. Full (FCL) and less-than-container (LCL) loads with competitive transit times.' },
+    { icon: Train, title: 'Rail Freight', desc: 'Eco-friendly rail transport connecting major trade corridors across Europe, Asia and North America. Ideal for heavy and bulk cargo.' },
+    { icon: Warehouse, title: 'Warehousing', desc: 'Strategic warehouse hubs in 30+ countries with inventory management, pick-and-pack and same-day dispatch.' },
+    { icon: Boxes, title: 'Multimodal Logistics', desc: 'Seamlessly combine air, road, rail and sea into one optimized supply chain with a single point of contact.' },
+    { icon: Globe, title: 'Customs Brokerage', desc: 'Expert clearance handling documentation, duties, taxes and compliance for smooth cross-border movement.' },
+    { icon: Snowflake, title: 'Cold Chain', desc: 'Temperature-controlled transport for pharmaceuticals, food and perishables with end-to-end monitoring.' },
+    { icon: Shield, title: 'Project & Heavy Cargo', desc: 'Specialized handling for oversized, heavy and high-value project cargo with dedicated route planning and insurance.' },
   ];
 
   const testimonials = [
@@ -73,7 +85,7 @@ const Index: React.FC = () => {
               </Button>
             </form>
             </div>
-            <div className="hidden lg:block animate-fade-in-right">
+            <div className="block mt-8 lg:mt-0 animate-fade-in-right">
               <LogisticsScene />
             </div>
           </div>
@@ -81,6 +93,27 @@ const Index: React.FC = () => {
       </section>
 
       <PartnerLogos />
+
+      {/* Freight Modes */}
+      <section className="py-20 bg-muted/30">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12 reveal">
+            <h2 className="text-3xl font-bold text-foreground mb-3">Freight & Transport Solutions</h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">Every mode of transport under one roof — we move your cargo by air, road, rail and sea with full multimodal coordination.</p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {freightModes.map((f, i) => (
+              <div key={i} className="reveal hover-lift p-6 rounded-xl bg-card border border-border shadow-card group" style={{ transitionDelay: `${i * 80}ms` }}>
+                <div className="w-12 h-12 rounded-lg gradient-primary flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                  <f.icon className="w-6 h-6 text-primary-foreground" />
+                </div>
+                <h3 className="font-semibold text-lg text-foreground mb-2">{f.title}</h3>
+                <p className="text-muted-foreground text-sm">{f.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
       {/* Features */}
       <section className="py-20">
