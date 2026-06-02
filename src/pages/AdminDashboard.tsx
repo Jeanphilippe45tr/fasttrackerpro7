@@ -264,6 +264,18 @@ const AdminDashboard: React.FC = () => {
                 </div>
                 <div><label className="text-sm font-medium">Origin Location</label><Input value={form.origin} onChange={e => setForm(f => ({ ...f, origin: e.target.value }))} placeholder="e.g. New York, USA" /></div>
                 <div><label className="text-sm font-medium">Destination Location</label><Input value={form.destination} onChange={e => setForm(f => ({ ...f, destination: e.target.value }))} placeholder="e.g. London, UK" /></div>
+                <div>
+                  <label className="text-sm font-medium">Transport Mode</label>
+                  <Select value={form.transportMode} onValueChange={v => setForm(f => ({ ...f, transportMode: v as Shipment['transportMode'] }))}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="road">🚚 Road Freight</SelectItem>
+                      <SelectItem value="sea">🚢 Sea Freight</SelectItem>
+                      <SelectItem value="air">✈️ Air Freight</SelectItem>
+                      <SelectItem value="rail">🚆 Rail Freight</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
                 <div className="grid grid-cols-3 gap-3">
                   <div><label className="text-sm font-medium">Weight</label><Input value={form.weight} onChange={e => setForm(f => ({ ...f, weight: e.target.value }))} placeholder="12 kg" /></div>
                   <div><label className="text-sm font-medium">Dimensions</label><Input value={form.dimensions} onChange={e => setForm(f => ({ ...f, dimensions: e.target.value }))} placeholder="40x30x20" /></div>
