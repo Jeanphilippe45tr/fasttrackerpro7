@@ -31,6 +31,42 @@ const geocode = async (place: string): Promise<[number, number] | null> => {
   return null;
 };
 
+// Great-circle distance in km
+const haversineKm = (a: [number, number], b: [number, number]): number => {
+  const R = 6371;
+  const dLat = (b[0] - a[0]) * Math.PI / 180;
+  const dLon = (b[1] - a[1]) * Math.PI / 180;
+  const lat1 = a[0] * Math.PI / 180;
+  const lat2 = b[0] * Math.PI / 180;
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(h));
+};
+
+// Estimate ETA date based on transport mode. Road/rail use OSRM; air/sea use distance/speed.
+const computeEta = async (
+  origin: [number, number],
+  dest: [number, number],
+  mode: Shipment['transportMode'],
+): Promise<string> => {
+  let hours = 0;
+  if (mode === 'road' || mode === 'rail') {
+    try {
+      const r = await fetch(`https://router.project-osrm.org/route/v1/driving/${origin[1]},${origin[0]};${dest[1]},${dest[0]}?overview=false`);
+      const data = await r.json();
+      if (data.routes?.[0]) hours = data.routes[0].duration / 3600;
+    } catch {}
+    if (mode === 'rail' && hours) hours = hours * 0.8;
+  }
+  if (!hours) {
+    const km = haversineKm(origin, dest);
+    const speed = mode === 'air' ? 800 : mode === 'sea' ? 40 : mode === 'rail' ? 80 : 70; // km/h
+    hours = km / speed;
+  }
+  const arr = new Date();
+  arr.setHours(arr.getHours() + Math.ceil(hours));
+  return arr.toISOString().split('T')[0];
+};
+
 const AdminDashboard: React.FC = () => {
   const { isAdminLoggedIn, shipments, addShipment, updateShipment, deleteShipment } = useApp();
   const { toast } = useToast();
