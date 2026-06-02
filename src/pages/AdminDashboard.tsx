@@ -94,19 +94,10 @@ const AdminDashboard: React.FC = () => {
     const originCoords = await geocode(form.origin);
     const destCoords = await geocode(form.destination);
 
-    // Get ETA from OSRM
+    // Get ETA based on selected transport mode
     let eta = 'Calculating...';
     if (originCoords && destCoords) {
-      try {
-        const r = await fetch(`https://router.project-osrm.org/route/v1/driving/${originCoords[1]},${originCoords[0]};${destCoords[1]},${destCoords[0]}?overview=false`);
-        const data = await r.json();
-        if (data.routes?.[0]) {
-          const hours = Math.ceil(data.routes[0].duration / 3600);
-          const arrDate = new Date();
-          arrDate.setHours(arrDate.getHours() + hours);
-          eta = arrDate.toISOString().split('T')[0];
-        }
-      } catch {}
+      eta = await computeEta(originCoords, destCoords, form.transportMode);
     }
 
     const newShipment: Shipment = {
@@ -121,6 +112,7 @@ const AdminDashboard: React.FC = () => {
       currentCoords: originCoords,
       status: 'pending',
       progress: 0,
+      transportMode: form.transportMode,
       estimatedArrival: eta,
       createdAt: new Date().toISOString().split('T')[0],
       updatedAt: new Date().toISOString().split('T')[0],
