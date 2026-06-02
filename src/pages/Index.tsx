@@ -31,9 +31,6 @@ const Index: React.FC = () => {
     { icon: MapPin, title: 'Last Mile Delivery', desc: 'Reliable last-mile delivery with proof of delivery photos, signature capture, and flexible rescheduling options for recipients.' },
   ];
 
-  const testimonials = [
-    ];
-
   const freightModes = [
     { icon: Plane, title: 'Air Freight', desc: 'Fast, reliable air cargo with priority customs clearance. Door-to-door and airport-to-airport options for time-critical shipments worldwide.' },
     { icon: Truck, title: 'Road Freight', desc: 'Flexible FTL and LTL trucking across regional and cross-border routes with live GPS tracking and guaranteed delivery windows.' },
@@ -46,7 +43,7 @@ const Index: React.FC = () => {
     { icon: Shield, title: 'Project & Heavy Cargo', desc: 'Specialized handling for oversized, heavy and high-value project cargo with dedicated route planning and insurance.' },
   ];
 
-  const _testimonials = [
+  const testimonials = [
     { name: 'Sarah Chen', role: 'Supply Chain Director, TechCorp', text: 'FastTrackerPro transformed our shipping operations. Real-time tracking reduced our customer inquiries by 60%.' },
     { name: 'Marco Rossi', role: 'CEO, EuroGoods', text: 'The most reliable logistics partner we\'ve worked with. Their global network is unmatched.' },
     { name: 'Amina Diallo', role: 'Operations Manager, AfriTrade', text: 'From customs clearance to last-mile delivery, FastTrackerPro handles everything seamlessly.' },
