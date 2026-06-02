@@ -328,7 +328,7 @@ const AdminDashboard: React.FC = () => {
                     <tr key={s.id} className="border-b border-border/50 hover:bg-muted/50">
                       <td className="py-3 font-mono text-xs">{s.trackingNumber}</td>
                       <td className="py-3">{s.clientName}</td>
-                      <td className="py-3 text-xs">{s.origin} → {s.destination}</td>
+                      <td className="py-3 text-xs">{s.origin} → {s.destination}<div className="text-muted-foreground">{modeLabels[s.transportMode]}</div></td>
                       <td className="py-3"><Badge className={statusColors[s.status] + ' text-xs'}>{s.status.replace('_', ' ')}</Badge></td>
                       <td className="py-3">
                         <div className="flex items-center gap-2">
