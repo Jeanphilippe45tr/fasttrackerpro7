@@ -415,12 +415,13 @@ const AdminDashboard: React.FC = () => {
             <DialogHeader><DialogTitle>Shipment Details</DialogTitle></DialogHeader>
             {viewShipment && (
               <div className="space-y-4">
-                <TrackingMap originCoords={viewShipment.originCoords} destCoords={viewShipment.destCoords} currentCoords={viewShipment.currentCoords} className="h-[300px]" />
+                <TrackingMap originCoords={viewShipment.originCoords} destCoords={viewShipment.destCoords} currentCoords={viewShipment.currentCoords} transportMode={viewShipment.transportMode} className="h-[300px]" />
                 <div className="grid grid-cols-2 gap-3 text-sm">
                   <div><span className="text-muted-foreground">Tracking:</span> <span className="font-mono">{viewShipment.trackingNumber}</span></div>
                   <div><span className="text-muted-foreground">Client:</span> {viewShipment.clientName}</div>
                   <div><span className="text-muted-foreground">Origin:</span> {viewShipment.origin}</div>
                   <div><span className="text-muted-foreground">Destination:</span> {viewShipment.destination}</div>
+                  <div><span className="text-muted-foreground">Transport:</span> <span className="capitalize">{modeLabels[viewShipment.transportMode]}</span></div>
                   <div><span className="text-muted-foreground">ETA:</span> {viewShipment.estimatedArrival}</div>
                   <div><span className="text-muted-foreground">Status:</span> <Badge className={statusColors[viewShipment.status]}>{viewShipment.status}</Badge></div>
                 </div>
