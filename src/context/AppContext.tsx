@@ -13,6 +13,7 @@ export interface Shipment {
   currentCoords: [number, number] | null;
   status: 'pending' | 'in_transit' | 'paused' | 'delivered' | 'cancelled';
   pauseReason?: string;
+  transportMode: 'road' | 'sea' | 'air' | 'rail';
   progress: number;
   estimatedArrival: string;
   createdAt: string;
@@ -106,6 +107,7 @@ const rowToShipment = (row: any): Shipment => ({
   currentCoords: row.current_coords as [number, number] | null,
   status: row.status,
   pauseReason: row.pause_reason || undefined,
+  transportMode: (row.transport_mode as Shipment['transportMode']) || 'road',
   progress: row.progress,
   estimatedArrival: row.estimated_arrival || '',
   createdAt: row.created_at?.split('T')[0] || '',
