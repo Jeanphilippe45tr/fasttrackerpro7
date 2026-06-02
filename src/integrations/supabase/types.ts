@@ -72,6 +72,7 @@ export type Database = {
           route: Json | null
           status: string
           tracking_number: string
+          transport_mode: string
           updated_at: string
           weight: string | null
         }
@@ -94,6 +95,7 @@ export type Database = {
           route?: Json | null
           status?: string
           tracking_number: string
+          transport_mode?: string
           updated_at?: string
           weight?: string | null
         }
@@ -116,6 +118,7 @@ export type Database = {
           route?: Json | null
           status?: string
           tracking_number?: string
+          transport_mode?: string
           updated_at?: string
           weight?: string | null
         }
