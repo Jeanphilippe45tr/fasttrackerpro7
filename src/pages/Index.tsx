@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Package, Search, Truck, Globe, Clock, Shield, ArrowRight, MapPin, CheckCircle, Headphones } from 'lucide-react';
+import { Package, Search, Truck, Globe, Clock, Shield, ArrowRight, MapPin, CheckCircle, Headphones, Plane, Ship, Train, Warehouse, Boxes, Snowflake } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import PartnerLogos from '@/components/PartnerLogos';
@@ -73,7 +73,7 @@ const Index: React.FC = () => {
               </Button>
             </form>
             </div>
-            <div className="hidden lg:block animate-fade-in-right">
+            <div className="block mt-8 lg:mt-0 animate-fade-in-right">
               <LogisticsScene />
             </div>
           </div>
@@ -81,6 +81,27 @@ const Index: React.FC = () => {
       </section>
 
       <PartnerLogos />
+
+      {/* Freight Modes */}
+      <section className="py-20 bg-muted/30">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12 reveal">
+            <h2 className="text-3xl font-bold text-foreground mb-3">Freight & Transport Solutions</h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">Every mode of transport under one roof — we move your cargo by air, road, rail and sea with full multimodal coordination.</p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {freightModes.map((f, i) => (
+              <div key={i} className="reveal hover-lift p-6 rounded-xl bg-card border border-border shadow-card group" style={{ transitionDelay: `${i * 80}ms` }}>
+                <div className="w-12 h-12 rounded-lg gradient-primary flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                  <f.icon className="w-6 h-6 text-primary-foreground" />
+                </div>
+                <h3 className="font-semibold text-lg text-foreground mb-2">{f.title}</h3>
+                <p className="text-muted-foreground text-sm">{f.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
       {/* Features */}
       <section className="py-20">
