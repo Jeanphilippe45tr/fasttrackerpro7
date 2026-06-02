@@ -43,6 +43,7 @@ const AdminDashboard: React.FC = () => {
     clientName: '', clientEmail: '', origin: '', destination: '',
     weight: '', dimensions: '', packageType: 'Standard Box',
     status: 'pending' as Shipment['status'], progress: 0,
+    transportMode: 'road' as Shipment['transportMode'],
   });
 
   if (!isAdminLoggedIn) return <Navigate to="/admin/login" />;
@@ -50,6 +51,7 @@ const AdminDashboard: React.FC = () => {
   const resetForm = () => setForm({
     clientName: '', clientEmail: '', origin: '', destination: '',
     weight: '', dimensions: '', packageType: 'Standard Box', status: 'pending', progress: 0,
+    transportMode: 'road',
   });
 
   const handleCreate = async () => {
