@@ -222,6 +222,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       current_coords: shipment.currentCoords as any,
       status: shipment.status,
       pause_reason: shipment.pauseReason || null,
+      transport_mode: shipment.transportMode,
       progress: shipment.progress,
       estimated_arrival: shipment.estimatedArrival,
       weight: shipment.weight,
