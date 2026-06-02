@@ -234,6 +234,7 @@ const AdminDashboard: React.FC = () => {
       origin: s.origin, destination: s.destination,
       weight: s.weight, dimensions: s.dimensions,
       packageType: s.packageType, status: s.status, progress: s.progress,
+      transportMode: s.transportMode,
     });
     setEditId(s.id);
   };
