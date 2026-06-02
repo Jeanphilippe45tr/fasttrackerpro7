@@ -132,6 +132,7 @@ const TrackPage: React.FC = () => {
                     destCoords={shipment.destCoords}
                     currentCoords={shipment.currentCoords}
                     route={shipment.route}
+                    transportMode={shipment.transportMode}
                     className="h-[350px] md:h-[450px]"
                   />
                 </CardContent>
