@@ -132,6 +132,7 @@ const TrackPage: React.FC = () => {
                     destCoords={shipment.destCoords}
                     currentCoords={shipment.currentCoords}
                     route={shipment.route}
+                    transportMode={shipment.transportMode}
                     className="h-[350px] md:h-[450px]"
                   />
                 </CardContent>
@@ -146,6 +147,7 @@ const TrackPage: React.FC = () => {
                     <div className="flex justify-between"><span className="text-muted-foreground">Weight</span><span className="font-medium text-foreground">{shipment.weight}</span></div>
                     <div className="flex justify-between"><span className="text-muted-foreground">Dimensions</span><span className="font-medium text-foreground">{shipment.dimensions}</span></div>
                     <div className="flex justify-between"><span className="text-muted-foreground">Type</span><span className="font-medium text-foreground">{shipment.packageType}</span></div>
+                    <div className="flex justify-between"><span className="text-muted-foreground">Transport</span><span className="font-medium text-foreground capitalize">{shipment.transportMode === 'sea' ? '🚢 Sea Freight' : shipment.transportMode === 'air' ? '✈️ Air Freight' : shipment.transportMode === 'rail' ? '🚆 Rail Freight' : '🚚 Road Freight'}</span></div>
                     <div className="flex justify-between"><span className="text-muted-foreground">Created</span><span className="font-medium text-foreground">{shipment.createdAt}</span></div>
                   </CardContent>
                 </Card>

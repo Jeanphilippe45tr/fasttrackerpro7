@@ -13,6 +13,7 @@ export interface Shipment {
   currentCoords: [number, number] | null;
   status: 'pending' | 'in_transit' | 'paused' | 'delivered' | 'cancelled';
   pauseReason?: string;
+  transportMode: 'road' | 'sea' | 'air' | 'rail';
   progress: number;
   estimatedArrival: string;
   createdAt: string;
@@ -106,6 +107,7 @@ const rowToShipment = (row: any): Shipment => ({
   currentCoords: row.current_coords as [number, number] | null,
   status: row.status,
   pauseReason: row.pause_reason || undefined,
+  transportMode: (row.transport_mode as Shipment['transportMode']) || 'road',
   progress: row.progress,
   estimatedArrival: row.estimated_arrival || '',
   createdAt: row.created_at?.split('T')[0] || '',
@@ -220,6 +222,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       current_coords: shipment.currentCoords as any,
       status: shipment.status,
       pause_reason: shipment.pauseReason || null,
+      transport_mode: shipment.transportMode,
       progress: shipment.progress,
       estimated_arrival: shipment.estimatedArrival,
       weight: shipment.weight,
@@ -243,6 +246,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (updates.currentCoords !== undefined) dbUpdates.current_coords = updates.currentCoords;
     if (updates.status !== undefined) dbUpdates.status = updates.status;
     if (updates.pauseReason !== undefined) dbUpdates.pause_reason = updates.pauseReason;
+    if (updates.transportMode !== undefined) dbUpdates.transport_mode = updates.transportMode;
     if (updates.progress !== undefined) dbUpdates.progress = updates.progress;
     if (updates.estimatedArrival !== undefined) dbUpdates.estimated_arrival = updates.estimatedArrival;
     if (updates.weight !== undefined) dbUpdates.weight = updates.weight;

@@ -22,6 +22,13 @@ const statusColors: Record<string, string> = {
   cancelled: 'bg-muted text-muted-foreground',
 };
 
+const modeLabels: Record<string, string> = {
+  road: '🚚 Road Freight',
+  sea: '🚢 Sea Freight',
+  air: '✈️ Air Freight',
+  rail: '🚆 Rail Freight',
+};
+
 const geocode = async (place: string): Promise<[number, number] | null> => {
   try {
     const r = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(place)}&limit=1`);
@@ -29,6 +36,42 @@ const geocode = async (place: string): Promise<[number, number] | null> => {
     if (data[0]) return [parseFloat(data[0].lat), parseFloat(data[0].lon)];
   } catch {}
   return null;
+};
+
+// Great-circle distance in km
+const haversineKm = (a: [number, number], b: [number, number]): number => {
+  const R = 6371;
+  const dLat = (b[0] - a[0]) * Math.PI / 180;
+  const dLon = (b[1] - a[1]) * Math.PI / 180;
+  const lat1 = a[0] * Math.PI / 180;
+  const lat2 = b[0] * Math.PI / 180;
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(h));
+};
+
+// Estimate ETA date based on transport mode. Road/rail use OSRM; air/sea use distance/speed.
+const computeEta = async (
+  origin: [number, number],
+  dest: [number, number],
+  mode: Shipment['transportMode'],
+): Promise<string> => {
+  let hours = 0;
+  if (mode === 'road' || mode === 'rail') {
+    try {
+      const r = await fetch(`https://router.project-osrm.org/route/v1/driving/${origin[1]},${origin[0]};${dest[1]},${dest[0]}?overview=false`);
+      const data = await r.json();
+      if (data.routes?.[0]) hours = data.routes[0].duration / 3600;
+    } catch {}
+    if (mode === 'rail' && hours) hours = hours * 0.8;
+  }
+  if (!hours) {
+    const km = haversineKm(origin, dest);
+    const speed = mode === 'air' ? 800 : mode === 'sea' ? 40 : mode === 'rail' ? 80 : 70; // km/h
+    hours = km / speed;
+  }
+  const arr = new Date();
+  arr.setHours(arr.getHours() + Math.ceil(hours));
+  return arr.toISOString().split('T')[0];
 };
 
 const AdminDashboard: React.FC = () => {
@@ -43,6 +86,7 @@ const AdminDashboard: React.FC = () => {
     clientName: '', clientEmail: '', origin: '', destination: '',
     weight: '', dimensions: '', packageType: 'Standard Box',
     status: 'pending' as Shipment['status'], progress: 0,
+    transportMode: 'road' as Shipment['transportMode'],
   });
 
   if (!isAdminLoggedIn) return <Navigate to="/admin/login" />;
@@ -50,25 +94,17 @@ const AdminDashboard: React.FC = () => {
   const resetForm = () => setForm({
     clientName: '', clientEmail: '', origin: '', destination: '',
     weight: '', dimensions: '', packageType: 'Standard Box', status: 'pending', progress: 0,
+    transportMode: 'road',
   });
 
   const handleCreate = async () => {
     const originCoords = await geocode(form.origin);
     const destCoords = await geocode(form.destination);
 
-    // Get ETA from OSRM
+    // Get ETA based on selected transport mode
     let eta = 'Calculating...';
     if (originCoords && destCoords) {
-      try {
-        const r = await fetch(`https://router.project-osrm.org/route/v1/driving/${originCoords[1]},${originCoords[0]};${destCoords[1]},${destCoords[0]}?overview=false`);
-        const data = await r.json();
-        if (data.routes?.[0]) {
-          const hours = Math.ceil(data.routes[0].duration / 3600);
-          const arrDate = new Date();
-          arrDate.setHours(arrDate.getHours() + hours);
-          eta = arrDate.toISOString().split('T')[0];
-        }
-      } catch {}
+      eta = await computeEta(originCoords, destCoords, form.transportMode);
     }
 
     const newShipment: Shipment = {
@@ -83,6 +119,7 @@ const AdminDashboard: React.FC = () => {
       currentCoords: originCoords,
       status: 'pending',
       progress: 0,
+      transportMode: form.transportMode,
       estimatedArrival: eta,
       createdAt: new Date().toISOString().split('T')[0],
       updatedAt: new Date().toISOString().split('T')[0],
@@ -106,10 +143,13 @@ const AdminDashboard: React.FC = () => {
       origin: form.origin, destination: form.destination,
       weight: form.weight, dimensions: form.dimensions,
       packageType: form.packageType, status: form.status, progress: form.progress,
+      transportMode: form.transportMode,
     };
 
     const existing = shipments.find(s => s.id === editId);
-    if (existing && (existing.destination !== form.destination || existing.origin !== form.origin)) {
+    const routeChanged = existing && (existing.destination !== form.destination || existing.origin !== form.origin);
+    const modeChanged = existing && existing.transportMode !== form.transportMode;
+    if (routeChanged) {
       // Destination changed - generate new tracking number
       updates.trackingNumber = generateTrackingNumber();
       updates.originCoords = await geocode(form.origin);
@@ -117,16 +157,7 @@ const AdminDashboard: React.FC = () => {
       updates.currentCoords = updates.originCoords;
       
       if (updates.originCoords && updates.destCoords) {
-        try {
-          const r = await fetch(`https://router.project-osrm.org/route/v1/driving/${updates.originCoords[1]},${updates.originCoords[0]};${updates.destCoords[1]},${updates.destCoords[0]}?overview=false`);
-          const data = await r.json();
-          if (data.routes?.[0]) {
-            const hours = Math.ceil(data.routes[0].duration / 3600);
-            const arrDate = new Date();
-            arrDate.setHours(arrDate.getHours() + hours);
-            updates.estimatedArrival = arrDate.toISOString().split('T')[0];
-          }
-        } catch {}
+        updates.estimatedArrival = await computeEta(updates.originCoords, updates.destCoords, form.transportMode);
       }
 
       updates.history = [...(existing.history || []), {
@@ -138,6 +169,9 @@ const AdminDashboard: React.FC = () => {
       }];
 
       toast({ title: 'Route Changed', description: `New tracking number: ${updates.trackingNumber}` });
+    } else if (modeChanged && existing?.originCoords && existing?.destCoords) {
+      // Recalculate ETA when only the transport mode changes
+      updates.estimatedArrival = await computeEta(existing.originCoords, existing.destCoords, form.transportMode);
     }
 
     updateShipment(editId, updates);
@@ -207,6 +241,7 @@ const AdminDashboard: React.FC = () => {
       origin: s.origin, destination: s.destination,
       weight: s.weight, dimensions: s.dimensions,
       packageType: s.packageType, status: s.status, progress: s.progress,
+      transportMode: s.transportMode,
     });
     setEditId(s.id);
   };
@@ -236,6 +271,18 @@ const AdminDashboard: React.FC = () => {
                 </div>
                 <div><label className="text-sm font-medium">Origin Location</label><Input value={form.origin} onChange={e => setForm(f => ({ ...f, origin: e.target.value }))} placeholder="e.g. New York, USA" /></div>
                 <div><label className="text-sm font-medium">Destination Location</label><Input value={form.destination} onChange={e => setForm(f => ({ ...f, destination: e.target.value }))} placeholder="e.g. London, UK" /></div>
+                <div>
+                  <label className="text-sm font-medium">Transport Mode</label>
+                  <Select value={form.transportMode} onValueChange={v => setForm(f => ({ ...f, transportMode: v as Shipment['transportMode'] }))}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="road">🚚 Road Freight</SelectItem>
+                      <SelectItem value="sea">🚢 Sea Freight</SelectItem>
+                      <SelectItem value="air">✈️ Air Freight</SelectItem>
+                      <SelectItem value="rail">🚆 Rail Freight</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
                 <div className="grid grid-cols-3 gap-3">
                   <div><label className="text-sm font-medium">Weight</label><Input value={form.weight} onChange={e => setForm(f => ({ ...f, weight: e.target.value }))} placeholder="12 kg" /></div>
                   <div><label className="text-sm font-medium">Dimensions</label><Input value={form.dimensions} onChange={e => setForm(f => ({ ...f, dimensions: e.target.value }))} placeholder="40x30x20" /></div>
@@ -281,7 +328,7 @@ const AdminDashboard: React.FC = () => {
                     <tr key={s.id} className="border-b border-border/50 hover:bg-muted/50">
                       <td className="py-3 font-mono text-xs">{s.trackingNumber}</td>
                       <td className="py-3">{s.clientName}</td>
-                      <td className="py-3 text-xs">{s.origin} → {s.destination}</td>
+                      <td className="py-3 text-xs">{s.origin} → {s.destination}<div className="text-muted-foreground">{modeLabels[s.transportMode]}</div></td>
                       <td className="py-3"><Badge className={statusColors[s.status] + ' text-xs'}>{s.status.replace('_', ' ')}</Badge></td>
                       <td className="py-3">
                         <div className="flex items-center gap-2">
@@ -322,6 +369,18 @@ const AdminDashboard: React.FC = () => {
               </div>
               <div><label className="text-sm font-medium">Origin</label><Input value={form.origin} onChange={e => setForm(f => ({ ...f, origin: e.target.value }))} /></div>
               <div><label className="text-sm font-medium">Destination (changing generates new tracking#)</label><Input value={form.destination} onChange={e => setForm(f => ({ ...f, destination: e.target.value }))} /></div>
+              <div>
+                <label className="text-sm font-medium">Transport Mode</label>
+                <Select value={form.transportMode} onValueChange={v => setForm(f => ({ ...f, transportMode: v as Shipment['transportMode'] }))}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="road">🚚 Road Freight</SelectItem>
+                    <SelectItem value="sea">🚢 Sea Freight</SelectItem>
+                    <SelectItem value="air">✈️ Air Freight</SelectItem>
+                    <SelectItem value="rail">🚆 Rail Freight</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="text-sm font-medium">Status</label>
@@ -363,12 +422,13 @@ const AdminDashboard: React.FC = () => {
             <DialogHeader><DialogTitle>Shipment Details</DialogTitle></DialogHeader>
             {viewShipment && (
               <div className="space-y-4">
-                <TrackingMap originCoords={viewShipment.originCoords} destCoords={viewShipment.destCoords} currentCoords={viewShipment.currentCoords} className="h-[300px]" />
+                <TrackingMap originCoords={viewShipment.originCoords} destCoords={viewShipment.destCoords} currentCoords={viewShipment.currentCoords} transportMode={viewShipment.transportMode} className="h-[300px]" />
                 <div className="grid grid-cols-2 gap-3 text-sm">
                   <div><span className="text-muted-foreground">Tracking:</span> <span className="font-mono">{viewShipment.trackingNumber}</span></div>
                   <div><span className="text-muted-foreground">Client:</span> {viewShipment.clientName}</div>
                   <div><span className="text-muted-foreground">Origin:</span> {viewShipment.origin}</div>
                   <div><span className="text-muted-foreground">Destination:</span> {viewShipment.destination}</div>
+                  <div><span className="text-muted-foreground">Transport:</span> <span className="capitalize">{modeLabels[viewShipment.transportMode]}</span></div>
                   <div><span className="text-muted-foreground">ETA:</span> {viewShipment.estimatedArrival}</div>
                   <div><span className="text-muted-foreground">Status:</span> <Badge className={statusColors[viewShipment.status]}>{viewShipment.status}</Badge></div>
                 </div>
