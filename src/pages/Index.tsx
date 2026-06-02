@@ -32,6 +32,21 @@ const Index: React.FC = () => {
   ];
 
   const testimonials = [
+    ];
+
+  const freightModes = [
+    { icon: Plane, title: 'Air Freight', desc: 'Fast, reliable air cargo with priority customs clearance. Door-to-door and airport-to-airport options for time-critical shipments worldwide.' },
+    { icon: Truck, title: 'Road Freight', desc: 'Flexible FTL and LTL trucking across regional and cross-border routes with live GPS tracking and guaranteed delivery windows.' },
+    { icon: Ship, title: 'Sea Freight', desc: 'Cost-effective ocean shipping for large volumes. Full (FCL) and less-than-container (LCL) loads with competitive transit times.' },
+    { icon: Train, title: 'Rail Freight', desc: 'Eco-friendly rail transport connecting major trade corridors across Europe, Asia and North America. Ideal for heavy and bulk cargo.' },
+    { icon: Warehouse, title: 'Warehousing', desc: 'Strategic warehouse hubs in 30+ countries with inventory management, pick-and-pack and same-day dispatch.' },
+    { icon: Boxes, title: 'Multimodal Logistics', desc: 'Seamlessly combine air, road, rail and sea into one optimized supply chain with a single point of contact.' },
+    { icon: Globe, title: 'Customs Brokerage', desc: 'Expert clearance handling documentation, duties, taxes and compliance for smooth cross-border movement.' },
+    { icon: Snowflake, title: 'Cold Chain', desc: 'Temperature-controlled transport for pharmaceuticals, food and perishables with end-to-end monitoring.' },
+    { icon: Shield, title: 'Project & Heavy Cargo', desc: 'Specialized handling for oversized, heavy and high-value project cargo with dedicated route planning and insurance.' },
+  ];
+
+  const _testimonials = [
     { name: 'Sarah Chen', role: 'Supply Chain Director, TechCorp', text: 'FastTrackerPro transformed our shipping operations. Real-time tracking reduced our customer inquiries by 60%.' },
     { name: 'Marco Rossi', role: 'CEO, EuroGoods', text: 'The most reliable logistics partner we\'ve worked with. Their global network is unmatched.' },
     { name: 'Amina Diallo', role: 'Operations Manager, AfriTrade', text: 'From customs clearance to last-mile delivery, FastTrackerPro handles everything seamlessly.' },
