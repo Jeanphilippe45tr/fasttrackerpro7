@@ -362,6 +362,18 @@ const AdminDashboard: React.FC = () => {
               </div>
               <div><label className="text-sm font-medium">Origin</label><Input value={form.origin} onChange={e => setForm(f => ({ ...f, origin: e.target.value }))} /></div>
               <div><label className="text-sm font-medium">Destination (changing generates new tracking#)</label><Input value={form.destination} onChange={e => setForm(f => ({ ...f, destination: e.target.value }))} /></div>
+              <div>
+                <label className="text-sm font-medium">Transport Mode</label>
+                <Select value={form.transportMode} onValueChange={v => setForm(f => ({ ...f, transportMode: v as Shipment['transportMode'] }))}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="road">🚚 Road Freight</SelectItem>
+                    <SelectItem value="sea">🚢 Sea Freight</SelectItem>
+                    <SelectItem value="air">✈️ Air Freight</SelectItem>
+                    <SelectItem value="rail">🚆 Rail Freight</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="text-sm font-medium">Status</label>
