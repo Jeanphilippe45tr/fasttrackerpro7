@@ -246,6 +246,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (updates.currentCoords !== undefined) dbUpdates.current_coords = updates.currentCoords;
     if (updates.status !== undefined) dbUpdates.status = updates.status;
     if (updates.pauseReason !== undefined) dbUpdates.pause_reason = updates.pauseReason;
+    if (updates.transportMode !== undefined) dbUpdates.transport_mode = updates.transportMode;
     if (updates.progress !== undefined) dbUpdates.progress = updates.progress;
     if (updates.estimatedArrival !== undefined) dbUpdates.estimated_arrival = updates.estimatedArrival;
     if (updates.weight !== undefined) dbUpdates.weight = updates.weight;
