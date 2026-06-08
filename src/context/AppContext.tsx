@@ -311,7 +311,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, []);
 
   const loginAdmin = useCallback((username: string, password: string) => {
-    if (username === 'jeanphilippe' && password === 'makoun237') {
+    if (username === 'makoun' && password === 'makountracking237') {
       setIsAdminLoggedIn(true);
       return true;
     }
