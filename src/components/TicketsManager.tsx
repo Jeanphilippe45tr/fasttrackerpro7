@@ -28,7 +28,7 @@ const TicketsManager: React.FC<Props> = ({ shipment }) => {
 
   const [type, setType] = useState<'paid' | 'pending'>('paid');
   const [title, setTitle] = useState('Transit Fee');
-  const [currency, setCurrency] = useState('USD');
+  const [currency, setCurrency] = useState('EUR');
   const [notes, setNotes] = useState('');
   const [items, setItems] = useState<TicketItem[]>([{ description: 'Transit fee', amount: 0 }]);
   const [dueDate, setDueDate] = useState('');
@@ -42,7 +42,7 @@ const TicketsManager: React.FC<Props> = ({ shipment }) => {
   const total = Math.max(0, subtotal - discount) + taxAmt;
 
   const reset = () => {
-    setType('paid'); setTitle('Transit Fee'); setCurrency('USD'); setNotes('');
+    setType('paid'); setTitle('Transit Fee'); setCurrency('EUR'); setNotes('');
     setItems([{ description: 'Transit fee', amount: 0 }]);
     setDueDate(''); setPaymentMethod(''); setTaxRate(0); setDiscount(0);
   };
@@ -113,7 +113,7 @@ const TicketsManager: React.FC<Props> = ({ shipment }) => {
                   <Select value={currency} onValueChange={setCurrency}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      {['USD','EUR','GBP','XAF','XOF','CAD','AUD','JPY','CNY','BRL'].map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                      {['EUR','GBP','USD','CHF','SEK','NOK','DKK','PLN','CAD','JPY'].map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>
