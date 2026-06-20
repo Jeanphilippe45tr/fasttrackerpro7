@@ -155,7 +155,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         items: (t.items as TicketItem[]) || [],
         notes: t.notes || '',
         issuedTo: t.issued_to || '',
-        issuedBy: t.issued_by || 'FastTrackerPro Admin',
+        issuedBy: t.issued_by || 'EuroTransit Admin',
         createdAt: t.created_at,
         dueDate: t.due_date || undefined,
         paymentMethod: t.payment_method || '',

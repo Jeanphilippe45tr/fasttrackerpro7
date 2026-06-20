@@ -3,13 +3,13 @@ import { Star } from 'lucide-react';
 
 const reviews = [
   { name: 'Sophie Lemaitre', role: 'Directrice Logistique, Paris', lang: 'FR', flag: '🇫🇷',
-    text: 'Service exceptionnel ! Le suivi en temps réel est incroyablement précis. Mes colis arrivent toujours à l\'heure prévue. FastTrackerPro a transformé notre chaîne d\'approvisionnement.' },
+    text: 'Service exceptionnel ! Le suivi en temps réel est incroyablement précis. Mes colis arrivent toujours à l\'heure prévue. EuroTransit a transformé notre chaîne d\'approvisionnement.' },
   { name: 'Michael Thompson', role: 'CEO, GlobalShip Inc.', lang: 'EN', flag: '🇺🇸',
     text: 'Absolutely the best logistics platform we have ever used. The live tracking map and instant notifications give our customers peace of mind. Highly recommended!' },
   { name: 'Carlos Mendes', role: 'Gerente de Operações, Lisboa', lang: 'PT', flag: '🇵🇹',
     text: 'Excelente plataforma! O rastreamento em tempo real funciona perfeitamente e o suporte ao cliente é fantástico. Os meus clientes adoram a transparência.' },
   { name: 'Amélie Dubois', role: 'Responsable E-commerce, Lyon', lang: 'FR', flag: '🇫🇷',
-    text: 'FastTrackerPro est devenu indispensable pour notre activité. La carte interactive est magnifique et les délais sont toujours respectés. Cinq étoiles bien méritées !' },
+    text: 'EuroTransit est devenu indispensable pour notre activité. La carte interactive est magnifique et les délais sont toujours respectés. Cinq étoiles bien méritées !' },
   { name: 'Jennifer Park', role: 'Logistics Manager, Singapore', lang: 'EN', flag: '🇸🇬',
     text: 'Outstanding service from start to finish. The pause/resume feature with detailed reasons keeps our clients fully informed. A truly professional solution.' },
   { name: 'Beatriz Santos', role: 'Diretora Comercial, São Paulo', lang: 'PT', flag: '🇧🇷',
@@ -19,7 +19,7 @@ const reviews = [
   { name: 'David Wilson', role: 'Supply Chain Lead, London', lang: 'EN', flag: '🇬🇧',
     text: 'The real-time GPS tracking is a game changer. Customers stop calling to ask "where is my package" - they can see it themselves. ROI in just two months.' },
   { name: 'Inês Ferreira', role: 'Coordenadora, Porto', lang: 'PT', flag: '🇵🇹',
-    text: 'Trabalho com FastTrackerPro há mais de um ano e nunca tive uma experiência ruim. O sistema de chat e os recibos PDF são muito profissionais. Cinco estrelas!' },
+    text: 'Trabalho com EuroTransit há mais de um ano e nunca tive uma experiência ruim. O sistema de chat e os recibos PDF são muito profissionais. Cinco estrelas!' },
 ];
 
 const CustomerReviews: React.FC = () => (

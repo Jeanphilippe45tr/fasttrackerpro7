@@ -14,7 +14,7 @@ const AboutPage: React.FC = () => {
         <div className="absolute inset-0 bg-primary/85" />
       </div>
       <div className="container mx-auto px-4 relative text-center">
-        <h1 className="text-4xl md:text-5xl font-bold text-primary-foreground mb-4 animate-fade-in">About FastTrackerPro</h1>
+        <h1 className="text-4xl md:text-5xl font-bold text-primary-foreground mb-4 animate-fade-in">About EuroTransit</h1>
         <p className="text-primary-foreground/80 max-w-2xl mx-auto text-lg animate-fade-in" style={{ animationDelay: '120ms' }}>Your trusted partner in global logistics since 2010. Connecting businesses and people across 200+ countries.</p>
       </div>
     </section>
@@ -24,7 +24,7 @@ const AboutPage: React.FC = () => {
       <div className="mb-16 reveal">
         <h2 className="text-2xl font-bold text-foreground mb-4">Our Story</h2>
         <div className="space-y-4 text-muted-foreground leading-relaxed">
-          <p>Founded in 2010 by a team of logistics veterans and technology innovators, FastTrackerPro was born from a simple idea: shipping should be transparent, reliable, and accessible to everyone.</p>
+          <p>Founded in 2010 by a team of logistics veterans and technology innovators, EuroTransit was born from a simple idea: shipping should be transparent, reliable, and accessible to everyone.</p>
           <p>Starting with a single warehouse in New York, we've grown into a global logistics network spanning 200+ countries with over 10,000 certified partners. Our proprietary GPS tracking technology gives clients unprecedented visibility into their shipments, from pickup to doorstep delivery.</p>
           <p>Today, we serve over 50,000 businesses — from small e-commerce sellers to Fortune 500 companies — delivering more than 2 million packages every month with a 99.8% on-time delivery rate.</p>
         </div>
