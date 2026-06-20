@@ -37,7 +37,7 @@ const AboutPage: React.FC = () => {
           { icon: Globe, title: 'Global Reach', desc: 'Operating in 200+ countries with a network of 10,000+ logistics partners, 500+ warehouses, and strategic hub locations on every continent.' },
           { icon: Users, title: 'Our Team', desc: 'A diverse team of 5,000+ logistics professionals, engineers, and customer support specialists committed to excellence in every shipment.' },
           { icon: Award, title: 'Recognition', desc: 'Named "Best Logistics Technology Platform" three years running by Global Supply Chain Awards. ISO 9001 and ISO 14001 certified.' },
-          { icon: TrendingUp, title: 'Innovation', desc: 'Investing over $20M annually in R&D. Our AI-powered route optimization reduces transit times by up to 30% while cutting carbon emissions.' },
+          { icon: TrendingUp, title: 'Innovation', desc: 'Investing over €18M annually in R&D. Our AI-powered route optimization reduces transit times by up to 30% while cutting carbon emissions.' },
           { icon: Heart, title: 'Sustainability', desc: 'Committed to carbon-neutral operations by 2028. Electric vehicle fleet deployment in 15+ cities. Eco-friendly packaging programs for all clients.' },
         ].map((item, i) => (
           <div key={i} className="reveal hover-lift flex gap-4 p-6 rounded-xl bg-card border border-border shadow-card" style={{ transitionDelay: `${i * 80}ms` }}>

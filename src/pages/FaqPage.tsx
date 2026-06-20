@@ -9,7 +9,7 @@ const faqs = [
   { q: 'Can the destination of a package change mid-route?', a: 'Yes. If the destination is updated, a new tracking number will be generated and the route, ETA, and live map will recalculate automatically.' },
   { q: 'Do you ship internationally?', a: 'We deliver to 200+ countries with full customs clearance, documentation handling, and door-to-door tracking.' },
   { q: 'How are tickets and invoices issued?', a: 'Admins can generate professional PDF tickets (paid receipts or pending invoices) including QR codes, taxes, discounts, and payment instructions. Clients can preview and download them from their tracking page.' },
-  { q: 'Is my cargo insured?', a: 'All shipments are covered by base liability insurance, and you can opt for full coverage up to $500,000 per shipment.' },
+  { q: 'Is my cargo insured?', a: 'All shipments are covered by base liability insurance, and you can opt for full coverage up to €450,000 per shipment.' },
   { q: 'What payment methods do you accept?', a: 'Bank transfer, credit card, and major mobile money providers depending on your region. Payment instructions appear on every invoice.' },
   { q: 'How fast is express delivery?', a: 'Same-day in 50+ major cities and next-day across most of Europe, North America, and Asia.' },
 ];
