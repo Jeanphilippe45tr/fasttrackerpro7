@@ -151,8 +151,7 @@ const Index: React.FC = () => {
                 <img src={warehouseImg} alt="Package collection at warehouse" loading="lazy" width={1280} height={720} className="w-full h-full object-cover" />
                 <div className="absolute top-4 left-4 w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-secondary-foreground font-bold text-lg">1</div>
               </div>
-              <h3 className="font-semibold text-lg text-foreground mb-2">Book & Collect</h3>
-
+              <h3 className="font-semibold text-lg text-foreground mb-2">{t('how.step1.title')}</h3>
               <p className="text-sm text-muted-foreground">{t('how.step1.desc')}</p>
             </div>
             <div className="text-center">
@@ -180,10 +179,10 @@ const Index: React.FC = () => {
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             {[
-              { value: '200+', label: 'Countries Served' },
-              { value: '50K+', label: 'Active Clients' },
-              { value: '99.8%', label: 'On-Time Delivery' },
-              { value: '24/7', label: 'Customer Support' },
+              { value: '200+', label: t('stats.countries') },
+              { value: '50K+', label: t('stats.clients') },
+              { value: '99.8%', label: t('stats.ontime') },
+              { value: '24/7', label: t('stats.support') },
             ].map((s, i) => (
               <div key={i}>
                 <div className="text-3xl md:text-4xl font-bold text-gradient">{s.value}</div>
@@ -198,8 +197,8 @@ const Index: React.FC = () => {
       <section className="py-20 bg-muted/30">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-foreground mb-3">What Our Clients Say</h2>
-            <p className="text-muted-foreground">Trusted by businesses across the globe</p>
+            <h2 className="text-3xl font-bold text-foreground mb-3">{t('testimonials.title')}</h2>
+            <p className="text-muted-foreground">{t('testimonials.subtitle')}</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {testimonials.map((t, i) => (
@@ -219,14 +218,14 @@ const Index: React.FC = () => {
       <section className="py-20">
         <div className="container mx-auto px-4">
           <div className="gradient-primary rounded-2xl p-8 md:p-16 text-center">
-            <h2 className="text-3xl md:text-4xl font-bold text-primary-foreground mb-4">Ready to Ship Worldwide?</h2>
-            <p className="text-primary-foreground/80 mb-8 max-w-xl mx-auto">Join 50,000+ businesses that trust FastTrackerPro for reliable, transparent, and fast global logistics.</p>
+            <h2 className="text-3xl md:text-4xl font-bold text-primary-foreground mb-4">{t('cta.title')}</h2>
+            <p className="text-primary-foreground/80 mb-8 max-w-xl mx-auto">{t('cta.subtitle')}</p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Button onClick={() => navigate('/contact')} className="bg-secondary text-secondary-foreground hover:bg-secondary/90 h-12 px-8 font-semibold">
-                Get a Free Quote
+                {t('cta.quote')}
               </Button>
               <Button variant="outline" onClick={() => navigate('/services')} className="h-12 px-8 border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10">
-                Explore Services
+                {t('cta.explore')}
               </Button>
             </div>
           </div>
