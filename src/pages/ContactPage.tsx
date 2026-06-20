@@ -16,8 +16,8 @@ const ContactPage: React.FC = () => (
         <div className="space-y-6">
           {[
             { icon: Mail, title: 'Email Us', info: 'support@fasttrackerp.com', sub: 'We respond within 2 hours' },
-            { icon: Phone, title: 'Call Us', info: '+1 (800) 555-FAST', sub: 'Toll-free, available 24/7' },
-            { icon: MapPin, title: 'Headquarters', info: '123 Logistics Avenue, New York, NY 10001', sub: 'Open Mon-Fri, 8AM-6PM EST' },
+            { icon: Phone, title: 'Call Us', info: 'Fast-Tracker Pro', sub: 'Toll-free, available 24/7' },
+            { icon: MapPin, title: 'Headquarters', info: 'World Wide Europe', sub: 'Open Mon-Fri, 8AM-6PM EST' },
             { icon: Clock, title: 'Business Hours', info: 'Monday - Friday: 8AM - 8PM EST', sub: '24/7 online tracking available' },
             { icon: Globe, title: 'Regional Offices', info: 'London • Dubai • Singapore • São Paulo', sub: 'Local support in your timezone' },
             { icon: Headphones, title: 'Live Chat', info: 'Available on every page', sub: 'Average response time: 30 seconds' },
