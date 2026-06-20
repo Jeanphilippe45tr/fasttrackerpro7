@@ -3,26 +3,29 @@ import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, Shield, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useApp } from '@/context/AppContext';
+import { useLang } from '@/i18n/LanguageContext';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 import logo from '@/assets/logo.png';
 
 const Navbar: React.FC = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { isAdminLoggedIn, logoutAdmin, messages } = useApp();
+  const { t } = useLang();
   const location = useLocation();
   const adminUnread = messages.filter(m => m.sender === 'client' && !m.readByAdmin).length;
 
   const isActive = (path: string) => location.pathname === path;
 
   const navLinks = [
-    { path: '/', label: 'Home' },
-    { path: '/track', label: 'Track Package' },
-    { path: '/services', label: 'Services' },
-    { path: '/coverage', label: 'Coverage' },
-    { path: '/pricing', label: 'Pricing' },
-    { path: '/reviews', label: 'Reviews' },
-    { path: '/faq', label: 'FAQ' },
-    { path: '/about', label: 'About' },
-    { path: '/contact', label: 'Contact' },
+    { path: '/', label: t('nav.home') },
+    { path: '/track', label: t('nav.track') },
+    { path: '/services', label: t('nav.services') },
+    { path: '/coverage', label: t('nav.coverage') },
+    { path: '/pricing', label: t('nav.pricing') },
+    { path: '/reviews', label: t('nav.reviews') },
+    { path: '/faq', label: t('nav.faq') },
+    { path: '/about', label: t('nav.about') },
+    { path: '/contact', label: t('nav.contact') },
   ];
 
   return (
@@ -49,16 +52,17 @@ const Navbar: React.FC = () => {
           </div>
 
           <div className="hidden md:flex items-center gap-2">
+            <LanguageSwitcher />
             {isAdminLoggedIn ? (
               <>
                 <Link to="/admin">
                   <Button variant="outline" size="sm" className="gap-1">
-                    <Shield className="w-4 h-4" /> Dashboard
+                    <Shield className="w-4 h-4" /> {t('nav.dashboard')}
                   </Button>
                 </Link>
                 <Link to="/admin/chat">
                   <Button variant="outline" size="sm" className="gap-1">
-                    <MessageSquare className="w-4 h-4" /> Chat
+                    <MessageSquare className="w-4 h-4" /> {t('nav.chat')}
                     {adminUnread > 0 && (
                       <span className="ml-1 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold">
                         {adminUnread}
@@ -66,20 +70,23 @@ const Navbar: React.FC = () => {
                     )}
                   </Button>
                 </Link>
-                <Button variant="ghost" size="sm" onClick={logoutAdmin}>Logout</Button>
+                <Button variant="ghost" size="sm" onClick={logoutAdmin}>{t('nav.logout')}</Button>
               </>
             ) : (
               <Link to="/admin/login">
                 <Button size="sm" className="gap-1 bg-primary text-primary-foreground hover:bg-primary/90">
-                  <Shield className="w-4 h-4" /> Admin
+                  <Shield className="w-4 h-4" /> {t('nav.admin')}
                 </Button>
               </Link>
             )}
           </div>
 
-          <button className="md:hidden p-2" onClick={() => setMobileOpen(!mobileOpen)}>
-            {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </button>
+          <div className="md:hidden flex items-center gap-1">
+            <LanguageSwitcher />
+            <button className="p-2" onClick={() => setMobileOpen(!mobileOpen)}>
+              {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
+          </div>
         </div>
 
         {mobileOpen && (
@@ -99,11 +106,11 @@ const Navbar: React.FC = () => {
             <div className="pt-2 border-t border-border space-y-1">
               {isAdminLoggedIn ? (
                 <>
-                  <Link to="/admin" onClick={() => setMobileOpen(false)} className="block px-3 py-2 text-sm font-medium text-muted-foreground">Dashboard</Link>
-                  <button onClick={() => { logoutAdmin(); setMobileOpen(false); }} className="block px-3 py-2 text-sm font-medium text-muted-foreground">Logout</button>
+                  <Link to="/admin" onClick={() => setMobileOpen(false)} className="block px-3 py-2 text-sm font-medium text-muted-foreground">{t('nav.dashboard')}</Link>
+                  <button onClick={() => { logoutAdmin(); setMobileOpen(false); }} className="block px-3 py-2 text-sm font-medium text-muted-foreground">{t('nav.logout')}</button>
                 </>
               ) : (
-                <Link to="/admin/login" onClick={() => setMobileOpen(false)} className="block px-3 py-2 text-sm font-medium text-muted-foreground">Admin Login</Link>
+                <Link to="/admin/login" onClick={() => setMobileOpen(false)} className="block px-3 py-2 text-sm font-medium text-muted-foreground">{t('nav.adminLogin')}</Link>
               )}
             </div>
           </div>
