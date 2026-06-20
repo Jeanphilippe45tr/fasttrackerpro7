@@ -33,8 +33,8 @@ const Navbar: React.FC = () => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           <Link to="/" className="flex items-center gap-2">
-            <img src={logo} alt="FastTrackerPro" className="h-9 w-9 rounded-lg object-contain" width={36} height={36} />
-            <span className="font-bold text-lg text-foreground">Fast<span className="text-secondary">Tracker</span>Pro</span>
+            <img src={logo} alt="EuroTransit" className="h-9 w-9 rounded-lg object-contain" width={36} height={36} />
+            <span className="font-bold text-lg text-foreground">Euro<span className="text-secondary">Transit</span></span>
           </Link>
 
           <div className="hidden md:flex items-center gap-1">
