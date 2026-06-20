@@ -152,6 +152,7 @@ const Index: React.FC = () => {
                 <div className="absolute top-4 left-4 w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-secondary-foreground font-bold text-lg">1</div>
               </div>
               <h3 className="font-semibold text-lg text-foreground mb-2">Book & Collect</h3>
+
               <p className="text-sm text-muted-foreground">{t('how.step1.desc')}</p>
             </div>
             <div className="text-center">
