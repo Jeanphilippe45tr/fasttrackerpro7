@@ -61,7 +61,7 @@ const LogisticsScene: React.FC<{ className?: string }> = ({ className = '' }) =>
       <div className="animate-drive-x">
         <div className="animate-bob inline-flex items-center gap-1 px-2 py-1 rounded-md bg-card text-foreground shadow-card">
           <Truck className="w-4 h-4 text-secondary" />
-          <span className="text-[10px] font-bold">FastTrackerPro</span>
+          <span className="text-[10px] font-bold">EuroTransit</span>
         </div>
       </div>
     </div>

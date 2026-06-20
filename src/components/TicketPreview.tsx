@@ -57,7 +57,7 @@ const TicketPreview: React.FC<Props> = ({ ticket, shipmentInfo, open, onClose })
               <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                 <div style={{ width: 44, height: 44, borderRadius: '50%', background: accent, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700 }}>FT</div>
                 <div>
-                  <div style={{ fontSize: 22, fontWeight: 700 }}>FastTrackerPro</div>
+                  <div style={{ fontSize: 22, fontWeight: 700 }}>EuroTransit</div>
                   <div style={{ fontSize: 11, opacity: 0.8 }}>Global Logistics & Tracking Solutions</div>
                   <div style={{ fontSize: 10, opacity: 0.7 }}>support@fasttrackerpro.com · www.fasttrackerpro.com</div>
                 </div>
@@ -96,7 +96,7 @@ const TicketPreview: React.FC<Props> = ({ ticket, shipmentInfo, open, onClose })
                 </div>
                 <div>
                   <div style={{ fontSize: 10, fontWeight: 700, color: '#1e3a5f', letterSpacing: 1 }}>ISSUED BY</div>
-                  <div style={{ fontSize: 13, marginTop: 4 }}>{ticket.issuedBy || 'FastTrackerPro Admin'}</div>
+                  <div style={{ fontSize: 13, marginTop: 4 }}>{ticket.issuedBy || 'EuroTransit Admin'}</div>
                 </div>
               </div>
 
@@ -177,7 +177,7 @@ const TicketPreview: React.FC<Props> = ({ ticket, shipmentInfo, open, onClose })
 
             {/* Footer */}
             <div style={{ background: '#1e3a5f', color: '#fff', padding: '10px 24px', display: 'flex', justifyContent: 'space-between', fontSize: 10 }}>
-              <span><strong>FastTrackerPro</strong> — officially issued document.</span>
+              <span><strong>EuroTransit</strong> — officially issued document.</span>
               <span>{new Date().toLocaleDateString()}</span>
             </div>
           </div>

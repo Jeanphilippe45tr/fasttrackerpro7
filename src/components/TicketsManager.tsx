@@ -59,7 +59,7 @@ const TicketsManager: React.FC<Props> = ({ shipment }) => {
       items: items.filter(i => i.description.trim()),
       notes,
       issuedTo: shipment.clientName,
-      issuedBy: 'FastTrackerPro Admin',
+      issuedBy: 'EuroTransit Admin',
       createdAt: new Date().toISOString(),
       dueDate: dueDate || undefined,
       paymentMethod,
