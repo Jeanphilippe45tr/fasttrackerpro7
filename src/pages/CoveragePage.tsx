@@ -21,7 +21,7 @@ const CoveragePage: React.FC = () => {
           <div className="reveal">
             <Globe2 className="w-12 h-12 text-secondary mb-4 animate-spin-slow" />
             <h1 className="text-4xl md:text-5xl font-bold mb-3">Global Coverage</h1>
-            <p className="opacity-90">From bustling megacities to remote villages — FastTrackerPro reaches 200+ countries through our integrated air, sea, rail, and road network.</p>
+            <p className="opacity-90">From bustling megacities to remote villages — EuroTransit reaches 200+ countries through our integrated air, sea, rail, and road network.</p>
           </div>
           <LogisticsScene />
         </div>

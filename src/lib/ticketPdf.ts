@@ -43,7 +43,7 @@ export const generateTicketPdf = async (ticket: Ticket, shipmentInfo?: ShipmentI
   doc.text('FT', 20, 22, { align: 'center' });
 
   doc.setFontSize(20);
-  doc.text('FastTrackerPro', 32, 17);
+  doc.text('EuroTransit', 32, 17);
   doc.setFontSize(9);
   doc.setFont('helvetica', 'normal');
   doc.text('Global Logistics & Tracking Solutions', 32, 24);
@@ -97,7 +97,7 @@ export const generateTicketPdf = async (ticket: Ticket, shipmentInfo?: ShipmentI
   doc.setTextColor(50, 50, 50);
   doc.setFontSize(10);
   doc.text(ticket.issuedTo || shipmentInfo?.clientName || '-', 14, y + 6);
-  doc.text(ticket.issuedBy || 'FastTrackerPro Admin', 110, y + 6);
+  doc.text(ticket.issuedBy || 'EuroTransit Admin', 110, y + 6);
 
   if (shipmentInfo) {
     y += 16;
@@ -217,7 +217,7 @@ export const generateTicketPdf = async (ticket: Ticket, shipmentInfo?: ShipmentI
   doc.setTextColor(255, 255, 255);
   doc.setFontSize(8);
   doc.setFont('helvetica', 'bold');
-  doc.text('FastTrackerPro', 14, 289);
+  doc.text('EuroTransit', 14, 289);
   doc.setFont('helvetica', 'normal');
   doc.text('Officially issued document — keep for your records.', 14, 294);
   doc.text(`Page 1 of 1  |  ${new Date().toLocaleDateString()}`, W - 14, 294, { align: 'right' });

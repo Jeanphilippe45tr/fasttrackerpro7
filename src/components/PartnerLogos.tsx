@@ -21,7 +21,7 @@ const PartnerLogos: React.FC = () => (
       <div className="text-center mb-10">
         <p className="text-sm font-medium text-secondary mb-2 uppercase tracking-wider">Global Network</p>
         <h2 className="text-2xl md:text-3xl font-bold text-foreground">Integrated With Top Carriers Worldwide</h2>
-        <p className="text-muted-foreground mt-2 text-sm max-w-2xl mx-auto">FastTrackerPro connects to 100+ carriers globally so your shipments move seamlessly across networks.</p>
+        <p className="text-muted-foreground mt-2 text-sm max-w-2xl mx-auto">EuroTransit connects to 100+ carriers globally so your shipments move seamlessly across networks.</p>
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
         {partners.map(p => (

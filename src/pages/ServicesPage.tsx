@@ -12,7 +12,7 @@ const services = [
   { icon: Train, title: 'Rail Freight', desc: 'Eco-friendly rail transport connecting major trade routes across Europe, Asia, and North America. Ideal for heavy and bulk cargo.', color: 'text-success' },
   { icon: Package, title: 'Warehousing & Fulfillment', desc: 'Strategic warehouse locations in 30+ countries. Complete fulfillment services including storage, inventory management, and order processing.', color: 'text-warning' },
   { icon: Globe, title: 'Customs Brokerage', desc: 'Expert customs clearance ensuring smooth cross-border shipments. We handle documentation, duties, taxes, and compliance requirements.', color: 'text-destructive' },
-  { icon: Shield, title: 'Cargo Insurance', desc: 'Comprehensive insurance coverage up to $500,000 for all types of shipments. Protection against loss, damage, and delays.', color: 'text-primary' },
+  { icon: Shield, title: 'Cargo Insurance', desc: 'Comprehensive insurance coverage up to €450,000 for all types of shipments. Protection against loss, damage, and delays.', color: 'text-primary' },
   { icon: Clock, title: 'Supply Chain Solutions', desc: 'End-to-end supply chain management including procurement logistics, vendor management, and distribution optimization.', color: 'text-secondary' },
 ];
 
