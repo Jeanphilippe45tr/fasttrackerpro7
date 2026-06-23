@@ -12,6 +12,7 @@ import ChatWidget from '@/components/ChatWidget';
 import { generateTicketPdf } from '@/lib/ticketPdf';
 import TicketPreview from '@/components/TicketPreview';
 import { Badge as Bdg } from '@/components/ui/badge';
+import { useLang } from '@/i18n/LanguageContext';
 
 const statusConfig: Record<string, { color: string; icon: React.ElementType; label: string }> = {
   pending: { color: 'bg-warning text-warning-foreground', icon: Clock, label: 'Pending' },
@@ -23,6 +24,7 @@ const statusConfig: Record<string, { color: string; icon: React.ElementType; lab
 
 const TrackPage: React.FC = () => {
   const [searchParams] = useSearchParams();
+  const { t } = useLang();
   const [trackingInput, setTrackingInput] = useState(searchParams.get('id') || '');
   const [shipment, setShipment] = useState<Shipment | null>(null);
   const [notFound, setNotFound] = useState(false);
@@ -96,34 +98,37 @@ const TrackPage: React.FC = () => {
   };
 
   const sc = shipment ? statusConfig[shipment.status] : null;
+  const transportLabel = shipment
+    ? t(shipment.transportMode === 'sea' ? 'mode.sea' : shipment.transportMode === 'air' ? 'mode.air' : shipment.transportMode === 'rail' ? 'mode.rail' : 'mode.road')
+    : '';
 
   return (
     <div className="min-h-screen bg-muted/30 py-8">
       <div className="container mx-auto px-4">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-foreground mb-2">Track Your Package</h1>
-            <p className="text-muted-foreground">Enter your tracking number to see real-time updates</p>
+            <h1 className="text-3xl font-bold text-foreground mb-2">{t('track.title')}</h1>
+            <p className="text-muted-foreground">{t('track.subtitle')}</p>
           </div>
 
           <form onSubmit={handleSearch} className="flex gap-2 mb-8 max-w-xl mx-auto">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-              <Input value={trackingInput} onChange={e => setTrackingInput(e.target.value)} placeholder="Enter tracking number..." className="pl-10 h-12" />
+              <Input value={trackingInput} onChange={e => setTrackingInput(e.target.value)} placeholder={t('track.placeholder')} className="pl-10 h-12" />
             </div>
-            <Button type="submit" className="h-12 px-6 bg-secondary text-secondary-foreground hover:bg-secondary/90">Track</Button>
+            <Button type="submit" className="h-12 px-6 bg-secondary text-secondary-foreground hover:bg-secondary/90">{t('track.button')}</Button>
           </form>
 
           {loading && trackingInput && (
-            <div className="text-center py-8 text-muted-foreground">Loading shipment data...</div>
+            <div className="text-center py-8 text-muted-foreground">{t('track.loading')}</div>
           )}
 
           {notFound && !loading && (
             <Card className="mb-8 border-destructive/30">
               <CardContent className="py-8 text-center">
                 <AlertCircle className="w-12 h-12 text-destructive mx-auto mb-3" />
-                <h3 className="font-semibold text-lg text-foreground mb-1">Package Not Found</h3>
-                <p className="text-muted-foreground text-sm">Please check your tracking number and try again.</p>
+                <h3 className="font-semibold text-lg text-foreground mb-1">{t('track.notfound.title')}</h3>
+                <p className="text-muted-foreground text-sm">{t('track.notfound.desc')}</p>
               </CardContent>
             </Card>
           )}
@@ -136,20 +141,20 @@ const TrackPage: React.FC = () => {
                   <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                     <div>
                       <div className="flex items-center gap-3 mb-2">
-                        <Badge className={sc.color}><sc.icon className="w-3 h-3 mr-1" />{sc.label}</Badge>
+                        <Badge className={sc.color}><sc.icon className="w-3 h-3 mr-1" />{t(`status.${shipment.status}`)}</Badge>
                         <span className="text-sm text-muted-foreground font-mono">{shipment.trackingNumber}</span>
                       </div>
                       <h2 className="text-xl font-bold text-foreground">{shipment.origin} → {shipment.destination}</h2>
                     </div>
                     <div className="text-right">
-                      <div className="text-sm text-muted-foreground">Estimated Arrival</div>
+                    <div className="text-sm text-muted-foreground">{t('track.eta')}</div>
                       <div className="font-semibold text-foreground">{shipment.estimatedArrival}</div>
                     </div>
                   </div>
                   {/* Progress bar */}
                   <div className="mt-4">
                     <div className="flex justify-between text-xs text-muted-foreground mb-1">
-                      <span>Progress</span>
+                      <span>{t('track.progress')}</span>
                       <span>{shipment.progress}%</span>
                     </div>
                     <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
@@ -168,7 +173,7 @@ const TrackPage: React.FC = () => {
               {/* Map */}
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg flex items-center gap-2"><MapPin className="w-5 h-5 text-secondary" />Live Tracking Map</CardTitle>
+                  <CardTitle className="text-lg flex items-center gap-2"><MapPin className="w-5 h-5 text-secondary" />{t('track.map')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <TrackingMap
@@ -185,19 +190,19 @@ const TrackPage: React.FC = () => {
               {/* Details */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <Card>
-                  <CardHeader><CardTitle className="text-lg">Package Details</CardTitle></CardHeader>
+                  <CardHeader><CardTitle className="text-lg">{t('track.pkgDetails')}</CardTitle></CardHeader>
                   <CardContent className="space-y-3 text-sm">
-                    <div className="flex justify-between"><span className="text-muted-foreground">Client</span><span className="font-medium text-foreground">{shipment.clientName}</span></div>
-                    <div className="flex justify-between"><span className="text-muted-foreground">Weight</span><span className="font-medium text-foreground">{shipment.weight}</span></div>
-                    <div className="flex justify-between"><span className="text-muted-foreground">Dimensions</span><span className="font-medium text-foreground">{shipment.dimensions}</span></div>
-                    <div className="flex justify-between"><span className="text-muted-foreground">Type</span><span className="font-medium text-foreground">{shipment.packageType}</span></div>
-                    <div className="flex justify-between"><span className="text-muted-foreground">Transport</span><span className="font-medium text-foreground capitalize">{shipment.transportMode === 'sea' ? '🚢 Sea Freight' : shipment.transportMode === 'air' ? '✈️ Air Freight' : shipment.transportMode === 'rail' ? '🚆 Rail Freight' : '🚚 Road Freight'}</span></div>
-                    <div className="flex justify-between"><span className="text-muted-foreground">Created</span><span className="font-medium text-foreground">{shipment.createdAt}</span></div>
+                    <div className="flex justify-between"><span className="text-muted-foreground">{t('track.client')}</span><span className="font-medium text-foreground">{shipment.clientName}</span></div>
+                    <div className="flex justify-between"><span className="text-muted-foreground">{t('track.weight')}</span><span className="font-medium text-foreground">{shipment.weight}</span></div>
+                    <div className="flex justify-between"><span className="text-muted-foreground">{t('track.dimensions')}</span><span className="font-medium text-foreground">{shipment.dimensions}</span></div>
+                    <div className="flex justify-between"><span className="text-muted-foreground">{t('track.type')}</span><span className="font-medium text-foreground">{shipment.packageType}</span></div>
+                    <div className="flex justify-between"><span className="text-muted-foreground">{t('track.transport')}</span><span className="font-medium text-foreground">{transportLabel}</span></div>
+                    <div className="flex justify-between"><span className="text-muted-foreground">{t('track.created')}</span><span className="font-medium text-foreground">{shipment.createdAt}</span></div>
                   </CardContent>
                 </Card>
 
                 <Card>
-                  <CardHeader><CardTitle className="text-lg">Shipment History</CardTitle></CardHeader>
+                  <CardHeader><CardTitle className="text-lg">{t('track.history')}</CardTitle></CardHeader>
                   <CardContent>
                     <div className="space-y-4">
                       {shipment.history.map((event, i) => (
@@ -221,7 +226,7 @@ const TrackPage: React.FC = () => {
               {/* Chat Button */}
               <div className="text-center">
                 <Button onClick={() => setChatOpen(!chatOpen)} className="gap-2 bg-primary text-primary-foreground relative">
-                  <MessageSquare className="w-4 h-4" /> Chat with Support
+                  <MessageSquare className="w-4 h-4" /> {t('track.chat')}
                   {clientUnread > 0 && !chatOpen && (
                     <span className="absolute -top-2 -right-2 inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-destructive text-destructive-foreground text-xs font-bold">
                       {clientUnread}
@@ -234,7 +239,7 @@ const TrackPage: React.FC = () => {
               {tickets.length > 0 && (
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-lg flex items-center gap-2"><FileText className="w-5 h-5 text-secondary" /> Payment Tickets</CardTitle>
+                    <CardTitle className="text-lg flex items-center gap-2"><FileText className="w-5 h-5 text-secondary" /> {t('track.tickets')}</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-2">
                     {tickets.map(t => (
@@ -242,8 +247,8 @@ const TrackPage: React.FC = () => {
                         <div className="min-w-0">
                           <div className="flex items-center gap-2">
                             <span className="font-medium text-sm truncate">{t.title}</span>
-                            <Bdg className={t.ticketType === 'paid' ? 'bg-success text-success-foreground' : 'bg-warning text-warning-foreground'}>
-                              {t.ticketType === 'paid' ? 'PAID' : 'TO PAY'}
+                            <Bdg className={tk.ticketType === 'paid' ? 'bg-success text-success-foreground' : 'bg-warning text-warning-foreground'}>
+                              {tk.ticketType === 'paid' ? t('track.paid') : t('track.toPay')}
                             </Bdg>
                           </div>
                           <div className="text-xs text-muted-foreground font-mono">{t.ticketNumber} · {t.currency} {t.amount.toFixed(2)}</div>
