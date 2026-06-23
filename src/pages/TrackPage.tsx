@@ -242,26 +242,26 @@ const TrackPage: React.FC = () => {
                     <CardTitle className="text-lg flex items-center gap-2"><FileText className="w-5 h-5 text-secondary" /> {t('track.tickets')}</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-2">
-                    {tickets.map(t => (
-                      <div key={t.id} className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/30">
+                    {tickets.map(tk => (
+                      <div key={tk.id} className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/30">
                         <div className="min-w-0">
                           <div className="flex items-center gap-2">
-                            <span className="font-medium text-sm truncate">{t.title}</span>
+                            <span className="font-medium text-sm truncate">{tk.title}</span>
                             <Bdg className={tk.ticketType === 'paid' ? 'bg-success text-success-foreground' : 'bg-warning text-warning-foreground'}>
                               {tk.ticketType === 'paid' ? t('track.paid') : t('track.toPay')}
                             </Bdg>
                           </div>
-                          <div className="text-xs text-muted-foreground font-mono">{t.ticketNumber} · {t.currency} {t.amount.toFixed(2)}</div>
-                          {t.notes && <div className="text-xs text-muted-foreground mt-1">{t.notes}</div>}
+                          <div className="text-xs text-muted-foreground font-mono">{tk.ticketNumber} · {tk.currency} {tk.amount.toFixed(2)}</div>
+                          {tk.notes && <div className="text-xs text-muted-foreground mt-1">{tk.notes}</div>}
                         </div>
                         <div className="flex gap-1">
                           <Button size="sm" variant="outline" className="gap-1"
-                            onClick={() => setPreviewTicket(t)}>
-                            <Eye className="w-4 h-4" /> View
+                            onClick={() => setPreviewTicket(tk)}>
+                            <Eye className="w-4 h-4" /> {t('track.view')}
                           </Button>
                           <Button size="sm" className="gap-1 bg-secondary text-secondary-foreground hover:bg-secondary/90"
-                            onClick={() => generateTicketPdf(t, { trackingNumber: shipment.trackingNumber, origin: shipment.origin, destination: shipment.destination, clientName: shipment.clientName }).catch(console.error)}>
-                            <Download className="w-4 h-4" /> PDF
+                            onClick={() => generateTicketPdf(tk, { trackingNumber: shipment.trackingNumber, origin: shipment.origin, destination: shipment.destination, clientName: shipment.clientName }).catch(console.error)}>
+                            <Download className="w-4 h-4" /> {t('track.pdf')}
                           </Button>
                         </div>
                       </div>
