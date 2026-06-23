@@ -25,30 +25,43 @@ const Index: React.FC = () => {
   };
 
   const features = [
-    { icon: Truck, title: 'Express Delivery', desc: 'Same-day and next-day delivery options across 50+ major European cities. Priority handling ensures your urgent shipments arrive on time, every time.' },
-    { icon: Globe, title: 'EU & Worldwide Coverage', desc: 'Ship across all 27 EU countries and to 200+ destinations worldwide through our network of 10,000+ certified logistics partners. Customs clearance included.' },
-    { icon: Clock, title: 'Real-Time Tracking', desc: 'Monitor your packages live on an interactive map with GPS precision. Get instant notifications at every checkpoint with accurate ETA predictions.' },
-    { icon: Shield, title: 'Secure Shipping', desc: 'Full end-to-end cargo insurance up to €450,000. Temperature-controlled and hazardous material handling available.' },
-    { icon: Package, title: 'Warehousing & Fulfillment', desc: 'Strategic warehouse locations across Europe and 30+ countries. Inventory management, pick-and-pack, and same-day dispatch services.' },
-    { icon: MapPin, title: 'Last Mile Delivery', desc: 'Reliable last-mile delivery with proof of delivery photos, signature capture, and flexible rescheduling options for recipients.' },
+    { icon: Truck, k: 'feat.express' },
+    { icon: Globe, k: 'feat.coverage' },
+    { icon: Clock, k: 'feat.tracking' },
+    { icon: Shield, k: 'feat.secure' },
+    { icon: Package, k: 'feat.warehousing' },
+    { icon: MapPin, k: 'feat.lastmile' },
   ];
 
   const freightModes = [
-    { icon: Plane, title: 'Air Freight', desc: 'Fast, reliable air cargo with priority customs clearance. Door-to-door and airport-to-airport options for time-critical shipments worldwide.' },
-    { icon: Truck, title: 'Road Freight', desc: 'Flexible FTL and LTL trucking across regional and cross-border routes with live GPS tracking and guaranteed delivery windows.' },
-    { icon: Ship, title: 'Sea Freight', desc: 'Cost-effective ocean shipping for large volumes. Full (FCL) and less-than-container (LCL) loads with competitive transit times.' },
-    { icon: Train, title: 'Rail Freight', desc: 'Eco-friendly rail transport connecting major trade corridors across Europe, Asia and North America. Ideal for heavy and bulk cargo.' },
-    { icon: Warehouse, title: 'Warehousing', desc: 'Strategic warehouse hubs in 30+ countries with inventory management, pick-and-pack and same-day dispatch.' },
-    { icon: Boxes, title: 'Multimodal Logistics', desc: 'Seamlessly combine air, road, rail and sea into one optimized supply chain with a single point of contact.' },
-    { icon: Globe, title: 'Customs Brokerage', desc: 'Expert clearance handling documentation, duties, taxes and compliance for smooth cross-border movement.' },
-    { icon: Snowflake, title: 'Cold Chain', desc: 'Temperature-controlled transport for pharmaceuticals, food and perishables with end-to-end monitoring.' },
-    { icon: Shield, title: 'Project & Heavy Cargo', desc: 'Specialized handling for oversized, heavy and high-value project cargo with dedicated route planning and insurance.' },
+    { icon: Plane, k: 'freight.air' },
+    { icon: Truck, k: 'freight.road' },
+    { icon: Ship, k: 'freight.sea' },
+    { icon: Train, k: 'freight.rail' },
+    { icon: Warehouse, k: 'freight.warehouse' },
+    { icon: Boxes, k: 'freight.multimodal' },
+    { icon: Globe, k: 'freight.customs' },
+    { icon: Snowflake, k: 'freight.cold' },
+    { icon: Shield, k: 'freight.heavy' },
+  ];
+
+  const relayFeatures = [
+    { icon: Wallet, k: 'relay.feat1' },
+    { icon: Clock, k: 'relay.feat2' },
+    { icon: Leaf, k: 'relay.feat3' },
+    { icon: MapPin, k: 'relay.feat4' },
+  ];
+  const relayStats = [
+    { n: 'relay.stat1.n', l: 'relay.stat1.l' },
+    { n: 'relay.stat2.n', l: 'relay.stat2.l' },
+    { n: 'relay.stat3.n', l: 'relay.stat3.l' },
+    { n: 'relay.stat4.n', l: 'relay.stat4.l' },
   ];
 
   const testimonials = [
-    { name: 'Sophie Laurent', role: 'Supply Chain Director, ParisTech', text: 'EuroTransit transformed our shipping operations. Real-time tracking reduced our customer inquiries by 60%.' },
-    { name: 'Marco Rossi', role: 'CEO, Milano Goods', text: 'The most reliable logistics partner we\'ve worked with. Their European network is unmatched.' },
-    { name: 'Lukas Müller', role: 'Operations Manager, Berlin Trade', text: 'From customs clearance to last-mile delivery, EuroTransit handles everything seamlessly.' },
+    { name: 'Sophie Laurent', role: 'test.1.role', text: 'test.1.text' },
+    { name: 'Marco Rossi', role: 'test.2.role', text: 'test.2.text' },
+    { name: 'Lukas Müller', role: 'test.3.role', text: 'test.3.text' },
   ];
 
   return (
