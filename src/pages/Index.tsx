@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Package, Search, Truck, Globe, Clock, Shield, ArrowRight, MapPin, CheckCircle, Headphones, Plane, Ship, Train, Warehouse, Boxes, Snowflake } from 'lucide-react';
+import { Package, Search, Truck, Globe, Clock, Shield, ArrowRight, MapPin, CheckCircle, Headphones, Plane, Ship, Train, Warehouse, Boxes, Snowflake, Wallet, Leaf } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import PartnerLogos from '@/components/PartnerLogos';
@@ -122,11 +122,53 @@ const Index: React.FC = () => {
                 <div className="w-12 h-12 rounded-lg gradient-primary flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                   <f.icon className="w-6 h-6 text-primary-foreground" />
                 </div>
-                <h3 className="font-semibold text-lg text-foreground mb-2">{f.title}</h3>
-                <p className="text-muted-foreground text-sm">{f.desc}</p>
+                <h3 className="font-semibold text-lg text-foreground mb-2">{t(`${f.k}.t`)}</h3>
+                <p className="text-muted-foreground text-sm">{t(`${f.k}.d`)}</p>
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Mondial Relay */}
+      <section className="py-20 bg-card">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12 reveal">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-secondary/20 text-secondary mb-4 text-sm font-medium border border-secondary/30">
+              <Package className="w-4 h-4" /> {t('relay.badge')}
+            </div>
+            <h2 className="text-3xl font-bold text-foreground mb-3">{t('relay.title')}</h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">{t('relay.subtitle')}</p>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
+            {relayStats.map((s, i) => (
+              <div key={i} className="reveal text-center p-5 rounded-xl bg-muted/40 border border-border" style={{ transitionDelay: `${i * 70}ms` }}>
+                <div className="text-2xl md:text-3xl font-bold text-gradient">{t(s.n)}</div>
+                <div className="text-xs md:text-sm text-muted-foreground mt-1">{t(s.l)}</div>
+              </div>
+            ))}
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+            {relayFeatures.map((f, i) => (
+              <div key={i} className="reveal hover-lift p-6 rounded-xl bg-muted/30 border border-border" style={{ transitionDelay: `${i * 80}ms` }}>
+                <f.icon className="w-9 h-9 text-secondary mb-3" />
+                <h3 className="font-semibold text-foreground mb-1">{t(`${f.k}.t`)}</h3>
+                <p className="text-sm text-muted-foreground">{t(`${f.k}.d`)}</p>
+              </div>
+            ))}
+          </div>
+
+          <form onSubmit={(e) => e.preventDefault()} className="max-w-md mx-auto flex gap-2">
+            <div className="relative flex-1">
+              <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+              <Input value={postalCode} onChange={e => setPostalCode(e.target.value)} placeholder={t('relay.placeholder')} className="pl-10 h-12" />
+            </div>
+            <Button type="submit" className="h-12 px-6 bg-secondary text-secondary-foreground hover:bg-secondary/90 font-semibold">
+              {t('relay.search')}
+            </Button>
+          </form>
         </div>
       </section>
 
@@ -143,8 +185,8 @@ const Index: React.FC = () => {
                 <div className="w-12 h-12 rounded-lg gradient-primary flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                   <f.icon className="w-6 h-6 text-primary-foreground" />
                 </div>
-                <h3 className="font-semibold text-lg text-foreground mb-2">{f.title}</h3>
-                <p className="text-muted-foreground text-sm">{f.desc}</p>
+                <h3 className="font-semibold text-lg text-foreground mb-2">{t(`${f.k}.t`)}</h3>
+                <p className="text-muted-foreground text-sm">{t(`${f.k}.d`)}</p>
               </div>
             ))}
           </div>
