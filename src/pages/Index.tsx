@@ -13,6 +13,7 @@ import truckImg from '@/assets/delivery-truck.jpg';
 
 const Index: React.FC = () => {
   const [tracking, setTracking] = useState('');
+  const [postalCode, setPostalCode] = useState('');
   const navigate = useNavigate();
   useReveal();
   const { t } = useLang();
