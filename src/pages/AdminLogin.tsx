@@ -14,9 +14,14 @@ const AdminLogin: React.FC = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (loginAdmin(username, password)) {
+    setSubmitting(true);
+    const ok = await loginAdmin(username, password);
+    setSubmitting(false);
+    if (ok) {
       toast({ title: 'Welcome back!', description: 'You are now logged in as admin.' });
       navigate('/admin');
     } else {
@@ -44,8 +49,8 @@ const AdminLogin: React.FC = () => {
               <label className="text-sm font-medium text-foreground">Password</label>
               <Input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Enter password" className="mt-1" />
             </div>
-            <Button type="submit" className="w-full bg-primary text-primary-foreground hover:bg-primary/90 gap-2">
-              <LogIn className="w-4 h-4" /> Sign In
+            <Button type="submit" disabled={submitting} className="w-full bg-primary text-primary-foreground hover:bg-primary/90 gap-2">
+              <LogIn className="w-4 h-4" /> {submitting ? 'Signing in...' : 'Sign In'}
             </Button>
           </form>
         </CardContent>

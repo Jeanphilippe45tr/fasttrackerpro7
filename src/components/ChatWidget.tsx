@@ -4,18 +4,26 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useApp } from '@/context/AppContext';
+import type { ChatMessage } from '@/context/AppContext';
 
 interface ChatWidgetProps {
   shipmentId: string;
   senderRole: 'admin' | 'client';
+  /** Controlled (client) mode — when provided, the widget uses these instead of admin context. */
+  externalMessages?: ChatMessage[];
+  onSend?: (text: string) => void;
+  onRead?: () => void;
 }
 
-const ChatWidget: React.FC<ChatWidgetProps> = ({ shipmentId, senderRole }) => {
+const ChatWidget: React.FC<ChatWidgetProps> = ({ shipmentId, senderRole, externalMessages, onSend, onRead }) => {
   const [msg, setMsg] = useState('');
   const { messages, addMessage, markMessagesRead } = useApp();
   const bottomRef = useRef<HTMLDivElement>(null);
 
-  const chatMessages = messages.filter(m => m.shipmentId === shipmentId);
+  const controlled = externalMessages !== undefined;
+  const sourceMessages = controlled ? externalMessages! : messages;
+
+  const chatMessages = sourceMessages.filter(m => m.shipmentId === shipmentId);
   const unread = chatMessages.filter(m => m.sender !== senderRole && !(senderRole === 'admin' ? m.readByAdmin : m.readByClient)).length;
 
   useEffect(() => {
@@ -23,19 +31,27 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ shipmentId, senderRole }) => {
   }, [chatMessages.length]);
 
   useEffect(() => {
-    if (unread > 0) markMessagesRead(shipmentId, senderRole);
-  }, [shipmentId, senderRole, unread, markMessagesRead]);
+    if (unread > 0) {
+      if (controlled) onRead?.();
+      else markMessagesRead(shipmentId, senderRole);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shipmentId, senderRole, unread]);
 
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
     if (!msg.trim()) return;
-    addMessage({
-      id: crypto.randomUUID(),
-      shipmentId,
-      sender: senderRole,
-      message: msg.trim(),
-      timestamp: new Date().toLocaleString(),
-    });
+    if (controlled) {
+      onSend?.(msg.trim());
+    } else {
+      addMessage({
+        id: crypto.randomUUID(),
+        shipmentId,
+        sender: senderRole,
+        message: msg.trim(),
+        timestamp: new Date().toLocaleString(),
+      });
+    }
     setMsg('');
   };
 

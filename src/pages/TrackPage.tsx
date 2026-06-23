@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Search, Package, MapPin, Clock, AlertCircle, CheckCircle, Pause, MessageSquare, Download, FileText, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import TrackingMap from '@/components/TrackingMap';
 import { useApp } from '@/context/AppContext';
-import type { Shipment, Ticket } from '@/context/AppContext';
+import type { Shipment, Ticket, ChatMessage } from '@/context/AppContext';
 import ChatWidget from '@/components/ChatWidget';
 import { generateTicketPdf } from '@/lib/ticketPdf';
 import TicketPreview from '@/components/TicketPreview';
@@ -28,27 +28,71 @@ const TrackPage: React.FC = () => {
   const [notFound, setNotFound] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
   const [previewTicket, setPreviewTicket] = useState<Ticket | null>(null);
-  const { getShipmentByTracking, loading, getTicketsForShipment, messages } = useApp();
+  const { trackShipment, sendClientMessage, getClientMessages, markClientRead } = useApp();
+  const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [clientMessages, setClientMessages] = useState<ChatMessage[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [activeTracking, setActiveTracking] = useState<string>('');
 
-  const tickets = shipment ? getTicketsForShipment(shipment.id) : [];
-  const clientUnread = shipment ? messages.filter(m => m.shipmentId === shipment.id && m.sender === 'admin' && !m.readByClient).length : 0;
+  const clientUnread = shipment
+    ? clientMessages.filter(m => m.shipmentId === shipment.id && m.sender === 'admin' && !m.readByClient).length
+    : 0;
+
+  const runSearch = useCallback(async (tracking: string) => {
+    const t = tracking.trim();
+    if (!t) return;
+    setLoading(true);
+    setNotFound(false);
+    const result = await trackShipment(t);
+    setLoading(false);
+    if (!result) {
+      setShipment(null);
+      setTickets([]);
+      setClientMessages([]);
+      setActiveTracking('');
+      setNotFound(true);
+      return;
+    }
+    setShipment(result.shipment);
+    setTickets(result.tickets);
+    setClientMessages(result.messages);
+    setActiveTracking(result.shipment.trackingNumber);
+  }, [trackShipment]);
 
   useEffect(() => {
     const id = searchParams.get('id');
     if (id) {
       setTrackingInput(id);
-      const found = getShipmentByTracking(id);
-      setShipment(found || null);
-      setNotFound(!found && !loading);
+      runSearch(id);
     }
-  }, [searchParams, getShipmentByTracking, loading]);
+  }, [searchParams, runSearch]);
+
+  // Poll client chat messages while a shipment is loaded.
+  useEffect(() => {
+    if (!activeTracking) return;
+    const interval = setInterval(async () => {
+      const msgs = await getClientMessages(activeTracking);
+      setClientMessages(msgs);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [activeTracking, getClientMessages]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!trackingInput.trim()) return;
-    const found = getShipmentByTracking(trackingInput.trim());
-    setShipment(found || null);
-    setNotFound(!found);
+    runSearch(trackingInput);
+  };
+
+  const handleClientSend = async (text: string) => {
+    if (!activeTracking) return;
+    await sendClientMessage(activeTracking, text);
+    const msgs = await getClientMessages(activeTracking);
+    setClientMessages(msgs);
+  };
+
+  const handleClientRead = async () => {
+    if (!activeTracking) return;
+    await markClientRead(activeTracking);
+    setClientMessages(prev => prev.map(m => ({ ...m, readByClient: true })));
   };
 
   const sc = shipment ? statusConfig[shipment.status] : null;
@@ -221,7 +265,15 @@ const TrackPage: React.FC = () => {
                 </Card>
               )}
 
-              {chatOpen && <ChatWidget shipmentId={shipment.id} senderRole="client" />}
+              {chatOpen && (
+                <ChatWidget
+                  shipmentId={shipment.id}
+                  senderRole="client"
+                  externalMessages={clientMessages}
+                  onSend={handleClientSend}
+                  onRead={handleClientRead}
+                />
+              )}
               <TicketPreview ticket={previewTicket}
                 shipmentInfo={{ trackingNumber: shipment.trackingNumber, origin: shipment.origin, destination: shipment.destination, clientName: shipment.clientName }}
                 open={!!previewTicket} onClose={() => setPreviewTicket(null)} />
