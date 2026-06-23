@@ -265,7 +265,15 @@ const TrackPage: React.FC = () => {
                 </Card>
               )}
 
-              {chatOpen && <ChatWidget shipmentId={shipment.id} senderRole="client" />}
+              {chatOpen && (
+                <ChatWidget
+                  shipmentId={shipment.id}
+                  senderRole="client"
+                  externalMessages={clientMessages}
+                  onSend={handleClientSend}
+                  onRead={handleClientRead}
+                />
+              )}
               <TicketPreview ticket={previewTicket}
                 shipmentInfo={{ trackingNumber: shipment.trackingNumber, origin: shipment.origin, destination: shipment.destination, clientName: shipment.clientName }}
                 open={!!previewTicket} onClose={() => setPreviewTicket(null)} />
