@@ -1,5 +1,5 @@
 import React from 'react';
-import { Truck, Globe, Package, Shield, Clock, Plane, Ship, Train, CheckCircle } from 'lucide-react';
+import { Truck, Globe, Package, Shield, Clock, Plane, Ship, Train, CheckCircle, MapPin } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { useReveal } from '@/hooks/use-reveal';
 import { useLang } from '@/i18n/LanguageContext';
