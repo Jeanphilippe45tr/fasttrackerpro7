@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Package, Search, Truck, Globe, Clock, Shield, ArrowRight, MapPin, CheckCircle, Headphones, Plane, Ship, Train, Warehouse, Boxes, Snowflake } from 'lucide-react';
+import { Package, Search, Truck, Globe, Clock, Shield, ArrowRight, MapPin, CheckCircle, Headphones, Plane, Ship, Train, Warehouse, Boxes, Snowflake, Wallet, Leaf } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import PartnerLogos from '@/components/PartnerLogos';
@@ -13,6 +13,7 @@ import truckImg from '@/assets/delivery-truck.jpg';
 
 const Index: React.FC = () => {
   const [tracking, setTracking] = useState('');
+  const [postalCode, setPostalCode] = useState('');
   const navigate = useNavigate();
   useReveal();
   const { t } = useLang();
@@ -25,30 +26,43 @@ const Index: React.FC = () => {
   };
 
   const features = [
-    { icon: Truck, title: 'Express Delivery', desc: 'Same-day and next-day delivery options across 50+ major European cities. Priority handling ensures your urgent shipments arrive on time, every time.' },
-    { icon: Globe, title: 'EU & Worldwide Coverage', desc: 'Ship across all 27 EU countries and to 200+ destinations worldwide through our network of 10,000+ certified logistics partners. Customs clearance included.' },
-    { icon: Clock, title: 'Real-Time Tracking', desc: 'Monitor your packages live on an interactive map with GPS precision. Get instant notifications at every checkpoint with accurate ETA predictions.' },
-    { icon: Shield, title: 'Secure Shipping', desc: 'Full end-to-end cargo insurance up to €450,000. Temperature-controlled and hazardous material handling available.' },
-    { icon: Package, title: 'Warehousing & Fulfillment', desc: 'Strategic warehouse locations across Europe and 30+ countries. Inventory management, pick-and-pack, and same-day dispatch services.' },
-    { icon: MapPin, title: 'Last Mile Delivery', desc: 'Reliable last-mile delivery with proof of delivery photos, signature capture, and flexible rescheduling options for recipients.' },
+    { icon: Truck, k: 'feat.express' },
+    { icon: Globe, k: 'feat.coverage' },
+    { icon: Clock, k: 'feat.tracking' },
+    { icon: Shield, k: 'feat.secure' },
+    { icon: Package, k: 'feat.warehousing' },
+    { icon: MapPin, k: 'feat.lastmile' },
   ];
 
   const freightModes = [
-    { icon: Plane, title: 'Air Freight', desc: 'Fast, reliable air cargo with priority customs clearance. Door-to-door and airport-to-airport options for time-critical shipments worldwide.' },
-    { icon: Truck, title: 'Road Freight', desc: 'Flexible FTL and LTL trucking across regional and cross-border routes with live GPS tracking and guaranteed delivery windows.' },
-    { icon: Ship, title: 'Sea Freight', desc: 'Cost-effective ocean shipping for large volumes. Full (FCL) and less-than-container (LCL) loads with competitive transit times.' },
-    { icon: Train, title: 'Rail Freight', desc: 'Eco-friendly rail transport connecting major trade corridors across Europe, Asia and North America. Ideal for heavy and bulk cargo.' },
-    { icon: Warehouse, title: 'Warehousing', desc: 'Strategic warehouse hubs in 30+ countries with inventory management, pick-and-pack and same-day dispatch.' },
-    { icon: Boxes, title: 'Multimodal Logistics', desc: 'Seamlessly combine air, road, rail and sea into one optimized supply chain with a single point of contact.' },
-    { icon: Globe, title: 'Customs Brokerage', desc: 'Expert clearance handling documentation, duties, taxes and compliance for smooth cross-border movement.' },
-    { icon: Snowflake, title: 'Cold Chain', desc: 'Temperature-controlled transport for pharmaceuticals, food and perishables with end-to-end monitoring.' },
-    { icon: Shield, title: 'Project & Heavy Cargo', desc: 'Specialized handling for oversized, heavy and high-value project cargo with dedicated route planning and insurance.' },
+    { icon: Plane, k: 'freight.air' },
+    { icon: Truck, k: 'freight.road' },
+    { icon: Ship, k: 'freight.sea' },
+    { icon: Train, k: 'freight.rail' },
+    { icon: Warehouse, k: 'freight.warehouse' },
+    { icon: Boxes, k: 'freight.multimodal' },
+    { icon: Globe, k: 'freight.customs' },
+    { icon: Snowflake, k: 'freight.cold' },
+    { icon: Shield, k: 'freight.heavy' },
+  ];
+
+  const relayFeatures = [
+    { icon: Wallet, k: 'relay.feat1' },
+    { icon: Clock, k: 'relay.feat2' },
+    { icon: Leaf, k: 'relay.feat3' },
+    { icon: MapPin, k: 'relay.feat4' },
+  ];
+  const relayStats = [
+    { n: 'relay.stat1.n', l: 'relay.stat1.l' },
+    { n: 'relay.stat2.n', l: 'relay.stat2.l' },
+    { n: 'relay.stat3.n', l: 'relay.stat3.l' },
+    { n: 'relay.stat4.n', l: 'relay.stat4.l' },
   ];
 
   const testimonials = [
-    { name: 'Sophie Laurent', role: 'Supply Chain Director, ParisTech', text: 'EuroTransit transformed our shipping operations. Real-time tracking reduced our customer inquiries by 60%.' },
-    { name: 'Marco Rossi', role: 'CEO, Milano Goods', text: 'The most reliable logistics partner we\'ve worked with. Their European network is unmatched.' },
-    { name: 'Lukas Müller', role: 'Operations Manager, Berlin Trade', text: 'From customs clearance to last-mile delivery, EuroTransit handles everything seamlessly.' },
+    { name: 'Sophie Laurent', role: 'test.1.role', text: 'test.1.text' },
+    { name: 'Marco Rossi', role: 'test.2.role', text: 'test.2.text' },
+    { name: 'Lukas Müller', role: 'test.3.role', text: 'test.3.text' },
   ];
 
   return (
@@ -109,11 +123,53 @@ const Index: React.FC = () => {
                 <div className="w-12 h-12 rounded-lg gradient-primary flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                   <f.icon className="w-6 h-6 text-primary-foreground" />
                 </div>
-                <h3 className="font-semibold text-lg text-foreground mb-2">{f.title}</h3>
-                <p className="text-muted-foreground text-sm">{f.desc}</p>
+                <h3 className="font-semibold text-lg text-foreground mb-2">{t(`${f.k}.t`)}</h3>
+                <p className="text-muted-foreground text-sm">{t(`${f.k}.d`)}</p>
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Mondial Relay */}
+      <section className="py-20 bg-card">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12 reveal">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-secondary/20 text-secondary mb-4 text-sm font-medium border border-secondary/30">
+              <Package className="w-4 h-4" /> {t('relay.badge')}
+            </div>
+            <h2 className="text-3xl font-bold text-foreground mb-3">{t('relay.title')}</h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">{t('relay.subtitle')}</p>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
+            {relayStats.map((s, i) => (
+              <div key={i} className="reveal text-center p-5 rounded-xl bg-muted/40 border border-border" style={{ transitionDelay: `${i * 70}ms` }}>
+                <div className="text-2xl md:text-3xl font-bold text-gradient">{t(s.n)}</div>
+                <div className="text-xs md:text-sm text-muted-foreground mt-1">{t(s.l)}</div>
+              </div>
+            ))}
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+            {relayFeatures.map((f, i) => (
+              <div key={i} className="reveal hover-lift p-6 rounded-xl bg-muted/30 border border-border" style={{ transitionDelay: `${i * 80}ms` }}>
+                <f.icon className="w-9 h-9 text-secondary mb-3" />
+                <h3 className="font-semibold text-foreground mb-1">{t(`${f.k}.t`)}</h3>
+                <p className="text-sm text-muted-foreground">{t(`${f.k}.d`)}</p>
+              </div>
+            ))}
+          </div>
+
+          <form onSubmit={(e) => e.preventDefault()} className="max-w-md mx-auto flex gap-2">
+            <div className="relative flex-1">
+              <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+              <Input value={postalCode} onChange={e => setPostalCode(e.target.value)} placeholder={t('relay.placeholder')} className="pl-10 h-12" />
+            </div>
+            <Button type="submit" className="h-12 px-6 bg-secondary text-secondary-foreground hover:bg-secondary/90 font-semibold">
+              {t('relay.search')}
+            </Button>
+          </form>
         </div>
       </section>
 
@@ -130,8 +186,8 @@ const Index: React.FC = () => {
                 <div className="w-12 h-12 rounded-lg gradient-primary flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                   <f.icon className="w-6 h-6 text-primary-foreground" />
                 </div>
-                <h3 className="font-semibold text-lg text-foreground mb-2">{f.title}</h3>
-                <p className="text-muted-foreground text-sm">{f.desc}</p>
+                <h3 className="font-semibold text-lg text-foreground mb-2">{t(`${f.k}.t`)}</h3>
+                <p className="text-muted-foreground text-sm">{t(`${f.k}.d`)}</p>
               </div>
             ))}
           </div>
@@ -201,12 +257,12 @@ const Index: React.FC = () => {
             <p className="text-muted-foreground">{t('testimonials.subtitle')}</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {testimonials.map((t, i) => (
+            {testimonials.map((item, i) => (
               <div key={i} className="p-6 rounded-xl bg-card border border-border shadow-card">
-                <p className="text-muted-foreground text-sm mb-4 italic">"{t.text}"</p>
+                <p className="text-muted-foreground text-sm mb-4 italic">"{t(item.text)}"</p>
                 <div>
-                  <div className="font-semibold text-foreground text-sm">{t.name}</div>
-                  <div className="text-xs text-muted-foreground">{t.role}</div>
+                  <div className="font-semibold text-foreground text-sm">{item.name}</div>
+                  <div className="text-xs text-muted-foreground">{t(item.role)}</div>
                 </div>
               </div>
             ))}

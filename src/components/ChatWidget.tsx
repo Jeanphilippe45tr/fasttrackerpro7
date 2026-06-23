@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useApp } from '@/context/AppContext';
 import type { ChatMessage } from '@/context/AppContext';
+import { useLang } from '@/i18n/LanguageContext';
 
 interface ChatWidgetProps {
   shipmentId: string;
@@ -18,6 +19,7 @@ interface ChatWidgetProps {
 const ChatWidget: React.FC<ChatWidgetProps> = ({ shipmentId, senderRole, externalMessages, onSend, onRead }) => {
   const [msg, setMsg] = useState('');
   const { messages, addMessage, markMessagesRead } = useApp();
+  const { t } = useLang();
   const bottomRef = useRef<HTMLDivElement>(null);
 
   const controlled = externalMessages !== undefined;
@@ -59,7 +61,7 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ shipmentId, senderRole, externa
     <Card>
       <CardHeader className="py-3">
         <CardTitle className="text-base flex items-center gap-2">
-          Chat Support
+          {t('chat.title')}
           {unread > 0 && (
             <span className="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-destructive text-destructive-foreground text-xs font-bold">
               {unread}
@@ -70,7 +72,7 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ shipmentId, senderRole, externa
       <CardContent className="p-0">
         <div className="h-64 overflow-y-auto px-4 py-2 space-y-3">
           {chatMessages.length === 0 && (
-            <p className="text-sm text-muted-foreground text-center py-8">No messages yet. Start a conversation!</p>
+            <p className="text-sm text-muted-foreground text-center py-8">{t('chat.empty')}</p>
           )}
           {chatMessages.map(m => (
             <div key={m.id} className={`flex ${m.sender === senderRole ? 'justify-end' : 'justify-start'}`}>
@@ -79,7 +81,7 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ shipmentId, senderRole, externa
                   ? 'bg-primary text-primary-foreground'
                   : 'bg-muted text-foreground'
               }`}>
-                <div className="text-xs opacity-70 mb-0.5">{m.sender === 'admin' ? 'Support' : 'Client'}</div>
+                <div className="text-xs opacity-70 mb-0.5">{m.sender === 'admin' ? t('chat.support') : t('chat.client')}</div>
                 {m.message}
               </div>
             </div>
@@ -87,7 +89,7 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ shipmentId, senderRole, externa
           <div ref={bottomRef} />
         </div>
         <form onSubmit={handleSend} className="flex gap-2 p-3 border-t border-border">
-          <Input value={msg} onChange={e => setMsg(e.target.value)} placeholder="Type a message..." className="flex-1" />
+          <Input value={msg} onChange={e => setMsg(e.target.value)} placeholder={t('chat.placeholder')} className="flex-1" />
           <Button type="submit" size="icon" className="bg-secondary text-secondary-foreground hover:bg-secondary/90">
             <Send className="w-4 h-4" />
           </Button>
