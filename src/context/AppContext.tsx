@@ -203,7 +203,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [adminInvoke]);
 
   useEffect(() => {
-    if (adminToken) loadAdminData();
+    if (!adminToken) return;
+    loadAdminData();
+    const interval = setInterval(() => { loadAdminData(); }, 10000);
+    return () => clearInterval(interval);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [adminToken]);
 
