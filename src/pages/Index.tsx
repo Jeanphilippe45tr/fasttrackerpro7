@@ -257,12 +257,12 @@ const Index: React.FC = () => {
             <p className="text-muted-foreground">{t('testimonials.subtitle')}</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {testimonials.map((t, i) => (
+            {testimonials.map((item, i) => (
               <div key={i} className="p-6 rounded-xl bg-card border border-border shadow-card">
-                <p className="text-muted-foreground text-sm mb-4 italic">"{t.text}"</p>
+                <p className="text-muted-foreground text-sm mb-4 italic">"{t(item.text)}"</p>
                 <div>
-                  <div className="font-semibold text-foreground text-sm">{t.name}</div>
-                  <div className="text-xs text-muted-foreground">{t.role}</div>
+                  <div className="font-semibold text-foreground text-sm">{item.name}</div>
+                  <div className="text-xs text-muted-foreground">{t(item.role)}</div>
                 </div>
               </div>
             ))}
