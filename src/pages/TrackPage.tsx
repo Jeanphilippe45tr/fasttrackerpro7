@@ -28,27 +28,71 @@ const TrackPage: React.FC = () => {
   const [notFound, setNotFound] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
   const [previewTicket, setPreviewTicket] = useState<Ticket | null>(null);
-  const { getShipmentByTracking, loading, getTicketsForShipment, messages } = useApp();
+  const { trackShipment, sendClientMessage, getClientMessages, markClientRead } = useApp();
+  const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [clientMessages, setClientMessages] = useState<ChatMessage[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [activeTracking, setActiveTracking] = useState<string>('');
 
-  const tickets = shipment ? getTicketsForShipment(shipment.id) : [];
-  const clientUnread = shipment ? messages.filter(m => m.shipmentId === shipment.id && m.sender === 'admin' && !m.readByClient).length : 0;
+  const clientUnread = shipment
+    ? clientMessages.filter(m => m.shipmentId === shipment.id && m.sender === 'admin' && !m.readByClient).length
+    : 0;
+
+  const runSearch = useCallback(async (tracking: string) => {
+    const t = tracking.trim();
+    if (!t) return;
+    setLoading(true);
+    setNotFound(false);
+    const result = await trackShipment(t);
+    setLoading(false);
+    if (!result) {
+      setShipment(null);
+      setTickets([]);
+      setClientMessages([]);
+      setActiveTracking('');
+      setNotFound(true);
+      return;
+    }
+    setShipment(result.shipment);
+    setTickets(result.tickets);
+    setClientMessages(result.messages);
+    setActiveTracking(result.shipment.trackingNumber);
+  }, [trackShipment]);
 
   useEffect(() => {
     const id = searchParams.get('id');
     if (id) {
       setTrackingInput(id);
-      const found = getShipmentByTracking(id);
-      setShipment(found || null);
-      setNotFound(!found && !loading);
+      runSearch(id);
     }
-  }, [searchParams, getShipmentByTracking, loading]);
+  }, [searchParams, runSearch]);
+
+  // Poll client chat messages while a shipment is loaded.
+  useEffect(() => {
+    if (!activeTracking) return;
+    const interval = setInterval(async () => {
+      const msgs = await getClientMessages(activeTracking);
+      setClientMessages(msgs);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [activeTracking, getClientMessages]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!trackingInput.trim()) return;
-    const found = getShipmentByTracking(trackingInput.trim());
-    setShipment(found || null);
-    setNotFound(!found);
+    runSearch(trackingInput);
+  };
+
+  const handleClientSend = async (text: string) => {
+    if (!activeTracking) return;
+    await sendClientMessage(activeTracking, text);
+    const msgs = await getClientMessages(activeTracking);
+    setClientMessages(msgs);
+  };
+
+  const handleClientRead = async () => {
+    if (!activeTracking) return;
+    await markClientRead(activeTracking);
+    setClientMessages(prev => prev.map(m => ({ ...m, readByClient: true })));
   };
 
   const sc = shipment ? statusConfig[shipment.status] : null;
