@@ -80,10 +80,20 @@ interface AppState {
   markMessagesRead: (shipmentId: string, role: 'admin' | 'client') => void;
   addTicket: (ticket: Ticket) => void;
   deleteTicket: (id: string) => void;
-  loginAdmin: (username: string, password: string) => boolean;
+  loginAdmin: (username: string, password: string) => Promise<boolean>;
   logoutAdmin: () => void;
   getShipmentByTracking: (tracking: string) => Shipment | undefined;
   getTicketsForShipment: (shipmentId: string) => Ticket[];
+  trackShipment: (tracking: string) => Promise<TrackResult | null>;
+  sendClientMessage: (tracking: string, message: string) => Promise<void>;
+  getClientMessages: (tracking: string) => Promise<ChatMessage[]>;
+  markClientRead: (tracking: string) => Promise<void>;
+}
+
+export interface TrackResult {
+  shipment: Shipment;
+  tickets: Ticket[];
+  messages: ChatMessage[];
 }
 
 const AppContext = createContext<AppState | null>(null);
@@ -119,98 +129,87 @@ const rowToShipment = (row: any): Shipment => ({
   history: (row.history as ShipmentEvent[]) || [],
 });
 
+const rowToMessage = (m: any): ChatMessage => ({
+  id: m.id,
+  shipmentId: m.shipment_id,
+  sender: m.sender as 'admin' | 'client',
+  message: m.message,
+  timestamp: new Date(m.created_at).toLocaleString(),
+  readByAdmin: m.read_by_admin,
+  readByClient: m.read_by_client,
+});
+
+const rowToTicket = (t: any): Ticket => ({
+  id: t.id,
+  shipmentId: t.shipment_id,
+  ticketNumber: t.ticket_number,
+  ticketType: t.ticket_type as 'paid' | 'pending',
+  title: t.title,
+  amount: Number(t.amount),
+  currency: t.currency,
+  items: (t.items as TicketItem[]) || [],
+  notes: t.notes || '',
+  issuedTo: t.issued_to || '',
+  issuedBy: t.issued_by || 'EuroTransit Admin',
+  createdAt: t.created_at,
+  dueDate: t.due_date || undefined,
+  paymentMethod: t.payment_method || '',
+  taxRate: Number(t.tax_rate || 0),
+  discount: Number(t.discount || 0),
+});
+
+const ADMIN_TOKEN_KEY = 'eurotransit_admin_token';
+
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [shipments, setShipments] = useState<Shipment[]>([]);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [tickets, setTickets] = useState<Ticket[]>([]);
-  const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [adminToken, setAdminToken] = useState<string | null>(() => localStorage.getItem(ADMIN_TOKEN_KEY));
+  const [loading, setLoading] = useState(false);
 
-  // Load shipments from DB
-  useEffect(() => {
-    const fetchData = async () => {
-      const { data: shipmentRows } = await supabase.from('shipments').select('*').order('created_at', { ascending: false });
-      if (shipmentRows) setShipments(shipmentRows.map(rowToShipment));
+  const isAdminLoggedIn = !!adminToken;
 
-      const { data: msgRows } = await supabase.from('chat_messages').select('*').order('created_at', { ascending: true });
-      if (msgRows) setMessages(msgRows.map((m: any) => ({
-        id: m.id,
-        shipmentId: m.shipment_id,
-        sender: m.sender as 'admin' | 'client',
-        message: m.message,
-        timestamp: new Date(m.created_at).toLocaleString(),
-        readByAdmin: m.read_by_admin,
-        readByClient: m.read_by_client,
-      })));
+  // Helper: call the secure admin edge function with the stored token.
+  const adminInvoke = useCallback(async (action: string, data?: any) => {
+    const token = adminToken ?? localStorage.getItem(ADMIN_TOKEN_KEY);
+    const { data: res, error } = await supabase.functions.invoke('admin-api', {
+      body: { action, data },
+      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+    });
+    if (error) {
+      // Token likely expired/invalid → force logout
+      if ((error as any).context?.status === 401) {
+        localStorage.removeItem(ADMIN_TOKEN_KEY);
+        setAdminToken(null);
+      }
+      throw error;
+    }
+    return res;
+  }, [adminToken]);
 
-      const { data: ticketRows } = await supabase.from('tickets').select('*').order('created_at', { ascending: false });
-      if (ticketRows) setTickets(ticketRows.map((t: any) => ({
-        id: t.id,
-        shipmentId: t.shipment_id,
-        ticketNumber: t.ticket_number,
-        ticketType: t.ticket_type as 'paid' | 'pending',
-        title: t.title,
-        amount: Number(t.amount),
-        currency: t.currency,
-        items: (t.items as TicketItem[]) || [],
-        notes: t.notes || '',
-        issuedTo: t.issued_to || '',
-        issuedBy: t.issued_by || 'EuroTransit Admin',
-        createdAt: t.created_at,
-        dueDate: t.due_date || undefined,
-        paymentMethod: t.payment_method || '',
-        taxRate: Number(t.tax_rate || 0),
-        discount: Number(t.discount || 0),
-      })));
+  // Load all admin data once authenticated.
+  const loadAdminData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await adminInvoke('load');
+      setShipments((res.shipments ?? []).map(rowToShipment));
+      setMessages((res.messages ?? []).map(rowToMessage));
+      setTickets((res.tickets ?? []).map(rowToTicket));
+    } catch (e) {
+      console.error('Failed to load admin data', e);
+    } finally {
       setLoading(false);
-    };
-    fetchData();
+    }
+  }, [adminInvoke]);
 
-    // Realtime chat subscription
-    const channel = supabase
-      .channel('chat-realtime')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages' }, (payload) => {
-        const m = payload.new as any;
-        setMessages(prev => {
-          if (prev.some(msg => msg.id === m.id)) return prev;
-          return [...prev, {
-            id: m.id,
-            shipmentId: m.shipment_id,
-            sender: m.sender,
-            message: m.message,
-            timestamp: new Date(m.created_at).toLocaleString(),
-            readByAdmin: m.read_by_admin,
-            readByClient: m.read_by_client,
-          }];
-        });
-      })
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'chat_messages' }, (payload) => {
-        const m = payload.new as any;
-        setMessages(prev => prev.map(msg => msg.id === m.id ? { ...msg, readByAdmin: m.read_by_admin, readByClient: m.read_by_client } : msg));
-      })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'tickets' }, (payload) => {
-        if (payload.eventType === 'INSERT') {
-          const t = payload.new as any;
-          setTickets(prev => prev.some(x => x.id === t.id) ? prev : [{
-            id: t.id, shipmentId: t.shipment_id, ticketNumber: t.ticket_number,
-            ticketType: t.ticket_type, title: t.title, amount: Number(t.amount),
-            currency: t.currency, items: t.items || [], notes: t.notes || '',
-            issuedTo: t.issued_to || '', issuedBy: t.issued_by || '', createdAt: t.created_at,
-            dueDate: t.due_date || undefined, paymentMethod: t.payment_method || '',
-            taxRate: Number(t.tax_rate || 0), discount: Number(t.discount || 0),
-          }, ...prev]);
-        } else if (payload.eventType === 'DELETE') {
-          setTickets(prev => prev.filter(x => x.id !== (payload.old as any).id));
-        }
-      })
-      .subscribe();
-
-    return () => { supabase.removeChannel(channel); };
-  }, []);
+  useEffect(() => {
+    if (adminToken) loadAdminData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [adminToken]);
 
   const addShipment = useCallback(async (shipment: Shipment) => {
     setShipments(prev => [shipment, ...prev]);
-    await supabase.from('shipments').insert({
+    await adminInvoke('addShipment', {
       id: shipment.id,
       tracking_number: shipment.trackingNumber,
       client_name: shipment.clientName,
@@ -231,7 +230,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       route: shipment.route as any,
       history: shipment.history as any,
     });
-  }, []);
+  }, [adminInvoke]);
 
   const updateShipment = useCallback(async (id: string, updates: Partial<Shipment>) => {
     setShipments(prev => prev.map(s => s.id === id ? { ...s, ...updates, updatedAt: new Date().toISOString().split('T')[0] } : s));
@@ -254,39 +253,38 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (updates.packageType !== undefined) dbUpdates.package_type = updates.packageType;
     if (updates.route !== undefined) dbUpdates.route = updates.route;
     if (updates.history !== undefined) dbUpdates.history = updates.history;
-    await supabase.from('shipments').update(dbUpdates).eq('id', id);
-  }, []);
+    await adminInvoke('updateShipment', { id, updates: dbUpdates });
+  }, [adminInvoke]);
 
   const deleteShipment = useCallback(async (id: string) => {
     setShipments(prev => prev.filter(s => s.id !== id));
-    await supabase.from('shipments').delete().eq('id', id);
-  }, []);
+    await adminInvoke('deleteShipment', { id });
+  }, [adminInvoke]);
 
+  // Admin-side message send (ChatWidget in admin context).
   const addMessage = useCallback(async (msg: ChatMessage) => {
     setMessages(prev => [...prev, msg]);
-    await supabase.from('chat_messages').insert({
+    await adminInvoke('addMessage', {
       id: msg.id,
       shipment_id: msg.shipmentId,
-      sender: msg.sender,
+      sender: 'admin',
       message: msg.message,
-      read_by_admin: msg.sender === 'admin',
-      read_by_client: msg.sender === 'client',
+      read_by_admin: true,
+      read_by_client: false,
     });
-  }, []);
+  }, [adminInvoke]);
 
   const markMessagesRead = useCallback(async (shipmentId: string, role: 'admin' | 'client') => {
     setMessages(prev => prev.map(m => m.shipmentId === shipmentId
       ? { ...m, [role === 'admin' ? 'readByAdmin' : 'readByClient']: true } : m));
     if (role === 'admin') {
-      await supabase.from('chat_messages').update({ read_by_admin: true }).eq('shipment_id', shipmentId);
-    } else {
-      await supabase.from('chat_messages').update({ read_by_client: true }).eq('shipment_id', shipmentId);
+      await adminInvoke('markRead', { shipmentId });
     }
-  }, []);
+  }, [adminInvoke]);
 
   const addTicket = useCallback(async (ticket: Ticket) => {
     setTickets(prev => [ticket, ...prev]);
-    await supabase.from('tickets').insert({
+    await adminInvoke('addTicket', {
       id: ticket.id,
       shipment_id: ticket.shipmentId,
       ticket_number: ticket.ticketNumber,
@@ -303,23 +301,33 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       tax_rate: ticket.taxRate || 0,
       discount: ticket.discount || 0,
     });
-  }, []);
+  }, [adminInvoke]);
 
   const deleteTicket = useCallback(async (id: string) => {
     setTickets(prev => prev.filter(t => t.id !== id));
-    await supabase.from('tickets').delete().eq('id', id);
-  }, []);
+    await adminInvoke('deleteTicket', { id });
+  }, [adminInvoke]);
 
-  const loginAdmin = useCallback((username: string, password: string) => {
-    if (username === 'makoun' && password === 'makountracking237') {
-      setIsAdminLoggedIn(true);
+  const loginAdmin = useCallback(async (username: string, password: string) => {
+    try {
+      const { data: res, error } = await supabase.functions.invoke('admin-api', {
+        body: { action: 'login', data: { username, password } },
+      });
+      if (error || !res?.token) return false;
+      localStorage.setItem(ADMIN_TOKEN_KEY, res.token);
+      setAdminToken(res.token);
       return true;
+    } catch {
+      return false;
     }
-    return false;
   }, []);
 
   const logoutAdmin = useCallback(() => {
-    setIsAdminLoggedIn(false);
+    localStorage.removeItem(ADMIN_TOKEN_KEY);
+    setAdminToken(null);
+    setShipments([]);
+    setTickets([]);
+    setMessages([]);
   }, []);
 
   const getShipmentByTracking = useCallback((tracking: string) => {
@@ -330,12 +338,46 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return tickets.filter(t => t.shipmentId === shipmentId);
   }, [tickets]);
 
+  // ---- Public (client) tracking via secure edge function ----
+  const trackShipment = useCallback(async (tracking: string): Promise<TrackResult | null> => {
+    const { data: res, error } = await supabase.functions.invoke('public-api', {
+      body: { action: 'track', data: { trackingNumber: tracking.trim() } },
+    });
+    if (error || !res?.shipment) return null;
+    return {
+      shipment: rowToShipment(res.shipment),
+      tickets: (res.tickets ?? []).map(rowToTicket),
+      messages: (res.messages ?? []).map(rowToMessage),
+    };
+  }, []);
+
+  const sendClientMessage = useCallback(async (tracking: string, message: string) => {
+    await supabase.functions.invoke('public-api', {
+      body: { action: 'sendMessage', data: { trackingNumber: tracking.trim(), message } },
+    });
+  }, []);
+
+  const getClientMessages = useCallback(async (tracking: string): Promise<ChatMessage[]> => {
+    const { data: res, error } = await supabase.functions.invoke('public-api', {
+      body: { action: 'getMessages', data: { trackingNumber: tracking.trim() } },
+    });
+    if (error || !res?.messages) return [];
+    return res.messages.map(rowToMessage);
+  }, []);
+
+  const markClientRead = useCallback(async (tracking: string) => {
+    await supabase.functions.invoke('public-api', {
+      body: { action: 'markRead', data: { trackingNumber: tracking.trim() } },
+    });
+  }, []);
+
   return (
     <AppContext.Provider value={{
       shipments, messages, tickets, isAdminLoggedIn, loading,
       addShipment, updateShipment, deleteShipment,
       addMessage, markMessagesRead, addTicket, deleteTicket,
       loginAdmin, logoutAdmin, getShipmentByTracking, getTicketsForShipment,
+      trackShipment, sendClientMessage, getClientMessages, markClientRead,
     }}>
       {children}
     </AppContext.Provider>
