@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Search, Package, MapPin, Clock, AlertCircle, CheckCircle, Pause, MessageSquare, Download, FileText, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import TrackingMap from '@/components/TrackingMap';
 import { useApp } from '@/context/AppContext';
-import type { Shipment, Ticket } from '@/context/AppContext';
+import type { Shipment, Ticket, ChatMessage } from '@/context/AppContext';
 import ChatWidget from '@/components/ChatWidget';
 import { generateTicketPdf } from '@/lib/ticketPdf';
 import TicketPreview from '@/components/TicketPreview';
