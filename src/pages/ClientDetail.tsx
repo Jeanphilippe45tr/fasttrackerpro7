@@ -101,6 +101,7 @@ const ClientDetail: React.FC = () => {
         destination: client.destination,
         status: client.status,
         progress: client.progress ?? 0,
+        transportMode: client.transport_mode ?? 'road',
       });
       toast({ title: t('cd.saved') });
     } catch {
