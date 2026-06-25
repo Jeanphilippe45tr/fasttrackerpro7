@@ -1,8 +1,33 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors'
+import webpush from 'npm:web-push@3.6.7'
 
 const SECRET = Deno.env.get('ADMIN_TOKEN_SECRET')!
 const enc = new TextEncoder()
+
+const VAPID_PUBLIC = Deno.env.get('VAPID_PUBLIC_KEY')
+const VAPID_PRIVATE = Deno.env.get('VAPID_PRIVATE_KEY')
+if (VAPID_PUBLIC && VAPID_PRIVATE) {
+  try { webpush.setVapidDetails('mailto:support@eurotransit.app', VAPID_PUBLIC, VAPID_PRIVATE) } catch { /* ignore */ }
+}
+
+async function sendPush(supabase: any, column: string, value: string, payload: any) {
+  if (!VAPID_PUBLIC || !VAPID_PRIVATE || !value) return
+  const { data: subs } = await supabase.from('push_subscriptions').select('*').eq(column, value)
+  if (!subs?.length) return
+  await Promise.allSettled(subs.map(async (s: any) => {
+    try {
+      await webpush.sendNotification(
+        { endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } },
+        JSON.stringify(payload),
+      )
+    } catch (e: any) {
+      if (e?.statusCode === 404 || e?.statusCode === 410) {
+        await supabase.from('push_subscriptions').delete().eq('endpoint', s.endpoint)
+      }
+    }
+  }))
+}
 
 async function hmac(body: string): Promise<string> {
   const key = await crypto.subtle.importKey(
@@ -243,6 +268,12 @@ Deno.serve(async (req) => {
           read_by_admin: true, read_by_client: false,
         })
         if (error) throw error
+        await sendPush(supabase, 'tracking_code', c.tracking_code, {
+          title: 'Nouveau message de votre transporteur',
+          body: message.slice(0, 120),
+          tag: `chat-${c.id}`,
+          url: '/track',
+        })
         return json({ ok: true })
       }
       case 'markRead': {

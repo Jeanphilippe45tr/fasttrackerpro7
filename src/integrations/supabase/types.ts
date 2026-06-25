@@ -148,6 +148,39 @@ export type Database = {
           },
         ]
       }
+      push_subscriptions: {
+        Row: {
+          admin_id: string | null
+          auth: string
+          created_at: string
+          endpoint: string
+          id: string
+          p256dh: string
+          subscriber_type: string
+          tracking_code: string | null
+        }
+        Insert: {
+          admin_id?: string | null
+          auth: string
+          created_at?: string
+          endpoint: string
+          id?: string
+          p256dh: string
+          subscriber_type: string
+          tracking_code?: string | null
+        }
+        Update: {
+          admin_id?: string | null
+          auth?: string
+          created_at?: string
+          endpoint?: string
+          id?: string
+          p256dh?: string
+          subscriber_type?: string
+          tracking_code?: string | null
+        }
+        Relationships: []
+      }
       shipments: {
         Row: {
           client_email: string

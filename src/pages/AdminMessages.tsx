@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { ArrowLeft, Loader2, MessageSquare, Search } from 'lucide-react';
 import ChatWidget from '@/components/ChatWidget';
+import PushToggle from '@/components/PushToggle';
 import type { ChatMessage } from '@/context/AppContext';
 import { useLang } from '@/i18n/LanguageContext';
 import { notifyOnNewIncoming } from '@/lib/notify';
@@ -22,7 +23,7 @@ const mapRows = (rows: any[]): ChatMessage[] => (rows ?? []).map((m) => ({
 }));
 
 const AdminMessages: React.FC = () => {
-  const { adminInvoke } = useAuth();
+  const { adminInvoke, token } = useAuth();
   const navigate = useNavigate();
   const { t } = useLang();
   const [clients, setClients] = useState<any[]>([]);
@@ -97,9 +98,12 @@ const AdminMessages: React.FC = () => {
       <Button variant="ghost" className="mb-4" onClick={() => navigate('/admin/dashboard')}>
         <ArrowLeft className="w-4 h-4 mr-2" /> {t('common.back')}
       </Button>
-      <div className="flex items-center gap-2 mb-6">
-        <MessageSquare className="w-6 h-6 text-secondary" />
-        <h1 className="text-2xl font-bold">{t('chat.title')}</h1>
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+        <div className="flex items-center gap-2">
+          <MessageSquare className="w-6 h-6 text-secondary" />
+          <h1 className="text-2xl font-bold">{t('chat.title')}</h1>
+        </div>
+        <PushToggle subscriberType="admin" token={token ?? undefined} />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-[320px,1fr] gap-6">
