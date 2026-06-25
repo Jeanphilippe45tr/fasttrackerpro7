@@ -383,7 +383,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           description: ev.event_description,
         })),
       };
-      return { shipment: synthetic, tickets: (res.tickets ?? []).map(rowToTicket), messages: [] };
+      return { shipment: synthetic, tickets: (res.tickets ?? []).map(rowToTicket), messages: (res.messages ?? []).map(rowToMessage) };
     }
     if (!res?.shipment) return null;
     return {

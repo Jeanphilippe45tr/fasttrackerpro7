@@ -221,6 +221,34 @@ Deno.serve(async (req) => {
         if (error) throw error
         return json({ ok: true })
       }
+      case 'listMessages': {
+        const c = await ownClient(String(data?.clientId ?? ''))
+        if (!c) return json({ error: 'not_found' }, 404)
+        const { data: msgs } = await supabase
+          .from('chat_messages').select('*').eq('shipment_id', c.id)
+          .order('created_at', { ascending: true })
+        return json({ messages: msgs ?? [] })
+      }
+      case 'sendMessage': {
+        const c = await ownClient(String(data?.clientId ?? ''))
+        if (!c) return json({ error: 'not_found' }, 404)
+        const message = String(data?.message ?? '').trim()
+        if (!message || message.length > 2000) return json({ error: 'Invalid message' }, 400)
+        const { error } = await supabase.from('chat_messages').insert({
+          shipment_id: c.id, sender: 'admin', message,
+          read_by_admin: true, read_by_client: false,
+        })
+        if (error) throw error
+        return json({ ok: true })
+      }
+      case 'markRead': {
+        const c = await ownClient(String(data?.clientId ?? ''))
+        if (!c) return json({ error: 'not_found' }, 404)
+        const { error } = await supabase.from('chat_messages')
+          .update({ read_by_admin: true }).eq('shipment_id', c.id).eq('sender', 'client')
+        if (error) throw error
+        return json({ ok: true })
+      }
       default:
         return json({ error: 'Unknown action' }, 400)
     }

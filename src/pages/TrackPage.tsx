@@ -179,8 +179,10 @@ const TrackPage: React.FC = () => {
                   <TrackingMap
                     originCoords={shipment.originCoords}
                     destCoords={shipment.destCoords}
+                    origin={shipment.origin}
+                    destination={shipment.destination}
                     currentCoords={shipment.currentCoords}
-                    route={shipment.route}
+                    progress={shipment.progress}
                     transportMode={shipment.transportMode}
                     className="h-[350px] md:h-[450px]"
                   />

@@ -19,6 +19,9 @@ import { ArrowLeft, Loader2, Trash2, Save, Plus, MapPin, Clock } from 'lucide-re
 import ClientTicketsManager from '@/components/ClientTicketsManager';
 import { Slider } from '@/components/ui/slider';
 import { useLang } from '@/i18n/LanguageContext';
+import TrackingMap from '@/components/TrackingMap';
+import ChatWidget from '@/components/ChatWidget';
+import type { ChatMessage } from '@/context/AppContext';
 
 const ClientDetail: React.FC = () => {
   const { id } = useParams();
@@ -32,6 +35,40 @@ const ClientDetail: React.FC = () => {
   const [events, setEvents] = useState<any[]>([]);
   const [tickets, setTickets] = useState<any[]>([]);
   const [newEvent, setNewEvent] = useState({ eventDescription: '', location: '' });
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+
+  const mapRows = (rows: any[]): ChatMessage[] => (rows ?? []).map((m) => ({
+    id: m.id,
+    shipmentId: m.shipment_id,
+    sender: m.sender,
+    message: m.message,
+    timestamp: new Date(m.created_at).toLocaleString(),
+    readByAdmin: m.read_by_admin,
+    readByClient: m.read_by_client,
+  }));
+
+  const loadMessages = useCallback(async () => {
+    if (!id) return;
+    try {
+      const res = await adminInvoke('listMessages', { clientId: id });
+      setChatMessages(mapRows(res.messages));
+    } catch { /* ignore */ }
+  }, [adminInvoke, id]);
+
+  useEffect(() => {
+    loadMessages();
+    const interval = setInterval(loadMessages, 5000);
+    return () => clearInterval(interval);
+  }, [loadMessages]);
+
+  const handleAdminSend = async (text: string) => {
+    await adminInvoke('sendMessage', { clientId: id, message: text });
+    loadMessages();
+  };
+  const handleAdminRead = async () => {
+    await adminInvoke('markRead', { clientId: id });
+    setChatMessages((prev) => prev.map((m) => ({ ...m, readByAdmin: true })));
+  };
 
   const load = useCallback(async () => {
     try {
@@ -157,6 +194,20 @@ const ClientDetail: React.FC = () => {
         </CardContent>
       </Card>
 
+      {(client.origin || client.destination) && (
+        <Card className="mb-6">
+          <CardHeader><CardTitle className="flex items-center gap-2"><MapPin className="w-5 h-5 text-secondary" /> {t('track.map')}</CardTitle></CardHeader>
+          <CardContent>
+            <TrackingMap
+              origin={client.origin || ''}
+              destination={client.destination || ''}
+              progress={client.progress ?? 0}
+              className="h-[320px] md:h-[420px]"
+            />
+          </CardContent>
+        </Card>
+      )}
+
       <Card>
         <CardHeader><CardTitle>{t('cd.timeline')}</CardTitle></CardHeader>
         <CardContent className="space-y-4">
@@ -191,6 +242,16 @@ const ClientDetail: React.FC = () => {
           origin={client.origin || ''}
           destination={client.destination || ''}
           initialTickets={tickets}
+        />
+      </div>
+
+      <div className="mt-6">
+        <ChatWidget
+          shipmentId={client.id}
+          senderRole="admin"
+          externalMessages={chatMessages}
+          onSend={handleAdminSend}
+          onRead={handleAdminRead}
         />
       </div>
     </div>
