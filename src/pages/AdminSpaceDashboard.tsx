@@ -9,7 +9,7 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
-import { UserPlus, LogOut, Settings, Loader2, Package, Search, Copy } from 'lucide-react';
+import { UserPlus, LogOut, Settings, Loader2, Package, Search, Copy, MessageSquare } from 'lucide-react';
 import { useLang } from '@/i18n/LanguageContext';
 
 const statusColor: Record<string, string> = {
@@ -44,7 +44,7 @@ const AdminSpaceDashboard: React.FC = () => {
 
   return (
     <div className="container mx-auto px-4 py-10 max-w-6xl">
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
         <div className="flex items-center gap-3">
           <div className="w-11 h-11 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
             <Package className="w-6 h-6" />
@@ -56,14 +56,17 @@ const AdminSpaceDashboard: React.FC = () => {
             </p>
           </div>
         </div>
-        <div className="flex gap-2">
-          <Button onClick={() => navigate('/admin/clients/new')}>
+        <div className="grid grid-cols-2 sm:flex gap-2">
+          <Button className="w-full sm:w-auto" onClick={() => navigate('/admin/clients/new')}>
             <UserPlus className="w-4 h-4 mr-2" /> {t('adm.dash.addClient')}
           </Button>
-          <Button variant="outline" onClick={() => navigate('/admin/settings')}>
+          <Button className="w-full sm:w-auto" variant="outline" onClick={() => navigate('/admin/messages')}>
+            <MessageSquare className="w-4 h-4 mr-2" /> {t('chat.title')}
+          </Button>
+          <Button className="w-full sm:w-auto" variant="outline" onClick={() => navigate('/admin/settings')}>
             <Settings className="w-4 h-4 mr-2" /> {t('adm.dash.settings')}
           </Button>
-          <Button variant="outline" onClick={() => { logout(); navigate('/login'); }}>
+          <Button className="w-full sm:w-auto" variant="outline" onClick={() => { logout(); navigate('/login'); }}>
             <LogOut className="w-4 h-4 mr-2" /> {t('adm.dash.logout')}
           </Button>
         </div>
@@ -79,9 +82,9 @@ const AdminSpaceDashboard: React.FC = () => {
       </div>
 
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between gap-4">
+        <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <CardTitle>{t('adm.dash.myClients')}</CardTitle>
-          <div className="relative w-full max-w-xs">
+          <div className="relative w-full sm:max-w-xs">
             <Search className="absolute left-2.5 top-2.5 w-4 h-4 text-muted-foreground" />
             <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t('adm.dash.search')} className="pl-8" />
           </div>

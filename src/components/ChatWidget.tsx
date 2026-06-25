@@ -25,7 +25,11 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ shipmentId, senderRole, externa
   const controlled = externalMessages !== undefined;
   const sourceMessages = controlled ? externalMessages! : messages;
 
-  const chatMessages = sourceMessages.filter(m => m.shipmentId === shipmentId);
+  // In controlled mode the parent already scopes messages to this shipment,
+  // so we don't re-filter (the synthetic client id can differ from stored ids).
+  const chatMessages = controlled
+    ? sourceMessages
+    : sourceMessages.filter(m => m.shipmentId === shipmentId);
   const unread = chatMessages.filter(m => m.sender !== senderRole && !(senderRole === 'admin' ? m.readByAdmin : m.readByClient)).length;
 
   useEffect(() => {
