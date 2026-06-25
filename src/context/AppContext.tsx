@@ -384,6 +384,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         })),
       };
       return { shipment: synthetic, tickets: (res.tickets ?? []).map(rowToTicket), messages: [] };
+      // (messages handled below)
     }
     if (!res?.shipment) return null;
     return {
