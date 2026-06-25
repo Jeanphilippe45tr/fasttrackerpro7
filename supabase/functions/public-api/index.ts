@@ -66,6 +66,27 @@ Deno.serve(async (req) => {
     const { data: clientRow } = await supabase
       .from('clients').select('*').ilike('tracking_code', trackingNumber).maybeSingle()
     if (clientRow) {
+      // Chat actions for client tracking codes (keyed by clients.id).
+      if (action === 'sendMessage') {
+        const message = String(data?.message ?? '').trim()
+        if (!message || message.length > 2000) return json({ error: 'Invalid message' }, 400)
+        const { error } = await supabase.from('chat_messages').insert({
+          shipment_id: clientRow.id, sender: 'client', message,
+          read_by_admin: false, read_by_client: true,
+        })
+        if (error) return json({ error: error.message }, 500)
+        return json({ ok: true })
+      }
+      if (action === 'getMessages') {
+        const { data: m } = await supabase.from('chat_messages')
+          .select('*').eq('shipment_id', clientRow.id).order('created_at', { ascending: true })
+        return json({ messages: m ?? [] })
+      }
+      if (action === 'markRead') {
+        await supabase.from('chat_messages')
+          .update({ read_by_client: true }).eq('shipment_id', clientRow.id).eq('sender', 'admin')
+        return json({ ok: true })
+      }
       const { data: events } = await supabase
         .from('tracking_events').select('event_description, location, event_time')
         .eq('tracking_code', clientRow.tracking_code)
@@ -73,6 +94,9 @@ Deno.serve(async (req) => {
       const { data: tickets } = await supabase
         .from('tickets').select('*').eq('shipment_id', clientRow.id)
         .order('created_at', { ascending: false })
+      const { data: messages } = await supabase
+        .from('chat_messages').select('*').eq('shipment_id', clientRow.id)
+        .order('created_at', { ascending: true })
       // Minimal info only — never expose admin identity.
       return json({
         client: {
@@ -88,6 +112,7 @@ Deno.serve(async (req) => {
         },
         events: events ?? [],
         tickets: tickets ?? [],
+        messages: messages ?? [],
       })
     }
     return json({ error: 'not_found' }, 404)
