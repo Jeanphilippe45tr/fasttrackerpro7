@@ -7,11 +7,13 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { LogIn, Loader2 } from 'lucide-react';
+import { useLang } from '@/i18n/LanguageContext';
 
 const Login: React.FC = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t } = useLang();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -22,7 +24,7 @@ const Login: React.FC = () => {
     const res = await login(username, password);
     setLoading(false);
     if (!res.ok) {
-      toast({ title: 'Login failed', description: res.error, variant: 'destructive' });
+      toast({ title: t('login.failed'), description: res.error, variant: 'destructive' });
       return;
     }
     const role = res.user!.role;
@@ -38,23 +40,23 @@ const Login: React.FC = () => {
           <div className="mx-auto w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
             <LogIn className="w-6 h-6" />
           </div>
-          <CardTitle className="text-2xl">Sign in to EuroTransit</CardTitle>
-          <p className="text-sm text-muted-foreground">Super admins and admins log in here.</p>
+          <CardTitle className="text-2xl">{t('login.title')}</CardTitle>
+          <p className="text-sm text-muted-foreground">{t('login.subtitle')}</p>
         </CardHeader>
         <CardContent>
           <form onSubmit={onSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="username">Username</Label>
+              <Label htmlFor="username">{t('login.username')}</Label>
               <Input id="username" value={username} onChange={(e) => setUsername(e.target.value)}
-                placeholder="Your name" autoComplete="username" required />
+                placeholder={t('login.username')} autoComplete="username" required />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">{t('login.password')}</Label>
               <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••" autoComplete="current-password" required />
             </div>
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Sign in'}
+              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : t('login.submit')}
             </Button>
           </form>
         </CardContent>

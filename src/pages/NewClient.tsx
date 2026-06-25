@@ -14,11 +14,13 @@ import {
 } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, Loader2, Copy, CheckCircle2 } from 'lucide-react';
+import { useLang } from '@/i18n/LanguageContext';
 
 const NewClient: React.FC = () => {
   const { adminInvoke } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t } = useLang();
   const [form, setForm] = useState({
     clientName: '', phone: '', email: '', shipmentDescription: '',
     origin: '', destination: '', status: 'pending',
@@ -36,7 +38,7 @@ const NewClient: React.FC = () => {
       const res = await adminInvoke('createClient', form);
       setCreated(res.client);
     } catch {
-      toast({ title: 'Failed to create client', variant: 'destructive' });
+      toast({ title: t('nc.failed'), variant: 'destructive' });
     } finally {
       setLoading(false);
     }
@@ -45,52 +47,52 @@ const NewClient: React.FC = () => {
   return (
     <div className="container mx-auto px-4 py-10 max-w-2xl">
       <Button variant="ghost" className="mb-4" onClick={() => navigate('/admin/dashboard')}>
-        <ArrowLeft className="w-4 h-4 mr-2" /> Back
+        <ArrowLeft className="w-4 h-4 mr-2" /> {t('common.back')}
       </Button>
       <Card>
-        <CardHeader><CardTitle>Add a new client</CardTitle></CardHeader>
+        <CardHeader><CardTitle>{t('nc.title')}</CardTitle></CardHeader>
         <CardContent>
           <form onSubmit={onSubmit} className="space-y-4">
             <div className="grid sm:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="clientName">Client name *</Label>
+                <Label htmlFor="clientName">{t('nc.clientName')} *</Label>
                 <Input id="clientName" value={form.clientName} onChange={set('clientName')} required />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="phone">Phone</Label>
+                <Label htmlFor="phone">{t('nc.phone')}</Label>
                 <Input id="phone" value={form.phone} onChange={set('phone')} />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{t('nc.email')}</Label>
                 <Input id="email" type="email" value={form.email} onChange={set('email')} />
               </div>
               <div className="space-y-2">
-                <Label>Status</Label>
+                <Label>{t('nc.status')}</Label>
                 <Select value={form.status} onValueChange={set('status')}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="in_transit">In transit</SelectItem>
-                    <SelectItem value="delivered">Delivered</SelectItem>
-                    <SelectItem value="failed">Failed</SelectItem>
+                    <SelectItem value="pending">{t('opt.pending')}</SelectItem>
+                    <SelectItem value="in_transit">{t('opt.in_transit')}</SelectItem>
+                    <SelectItem value="delivered">{t('opt.delivered')}</SelectItem>
+                    <SelectItem value="failed">{t('opt.failed')}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="origin">Origin</Label>
+                <Label htmlFor="origin">{t('nc.origin')}</Label>
                 <Input id="origin" value={form.origin} onChange={set('origin')} placeholder="e.g. Paris, France" />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="destination">Destination</Label>
+                <Label htmlFor="destination">{t('nc.destination')}</Label>
                 <Input id="destination" value={form.destination} onChange={set('destination')} placeholder="e.g. Berlin, Germany" />
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="desc">Shipment description</Label>
+              <Label htmlFor="desc">{t('nc.description')}</Label>
               <Textarea id="desc" value={form.shipmentDescription} onChange={set('shipmentDescription')} rows={3} />
             </div>
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Create client & generate tracking code'}
+              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : t('nc.create')}
             </Button>
           </form>
         </CardContent>
@@ -99,18 +101,18 @@ const NewClient: React.FC = () => {
       <Dialog open={!!created} onOpenChange={(o) => { if (!o) navigate('/admin/dashboard'); }}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2"><CheckCircle2 className="w-5 h-5 text-primary" /> Client created</DialogTitle>
+            <DialogTitle className="flex items-center gap-2"><CheckCircle2 className="w-5 h-5 text-primary" /> {t('nc.created')}</DialogTitle>
           </DialogHeader>
-          <p className="text-sm text-muted-foreground">Share this unique tracking code with your client.</p>
+          <p className="text-sm text-muted-foreground">{t('nc.share')}</p>
           <div className="rounded-lg border bg-muted/40 p-5 text-center">
-            <p className="text-xs text-muted-foreground mb-1">Tracking code</p>
+            <p className="text-xs text-muted-foreground mb-1">{t('adm.dash.trackingCode')}</p>
             <p className="text-2xl font-mono font-bold tracking-wider">{created?.tracking_code}</p>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => { navigator.clipboard.writeText(created?.tracking_code); toast({ title: 'Copied' }); }}>
-              <Copy className="w-4 h-4 mr-2" /> Copy code
+            <Button variant="outline" onClick={() => { navigator.clipboard.writeText(created?.tracking_code); toast({ title: t('nc.copied') }); }}>
+              <Copy className="w-4 h-4 mr-2" /> {t('nc.copyCode')}
             </Button>
-            <Button onClick={() => navigate('/admin/dashboard')}>Done</Button>
+            <Button onClick={() => navigate('/admin/dashboard')}>{t('common.done')}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

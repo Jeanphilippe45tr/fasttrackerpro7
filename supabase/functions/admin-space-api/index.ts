@@ -148,6 +148,10 @@ Deno.serve(async (req) => {
         if (data?.origin !== undefined) updates.origin = String(data.origin)
         if (data?.destination !== undefined) updates.destination = String(data.destination)
         if (data?.status !== undefined && STATUSES.includes(data.status)) updates.status = data.status
+        if (data?.progress !== undefined) {
+          const p = Math.max(0, Math.min(100, Math.round(Number(data.progress) || 0)))
+          updates.progress = p
+        }
         const { data: updated, error } = await supabase
           .from('clients').update(updates).eq('id', c.id).eq('admin_id', adminId).select('*').single()
         if (error) throw error
