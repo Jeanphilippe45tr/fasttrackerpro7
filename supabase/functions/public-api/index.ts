@@ -176,6 +176,7 @@ Deno.serve(async (req) => {
           read_by_client: true,
         })
         if (error) throw error
+        await notifyAdmin(supabase, null, message, '/admin/dashboard')
         return json({ ok: true })
       }
       case 'markRead': {
