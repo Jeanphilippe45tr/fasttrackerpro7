@@ -1,5 +1,5 @@
 import React from 'react';
-import { Mail, Phone, MapPin, Clock, Globe, Headphones } from 'lucide-react';
+import { MapPin, Clock, Globe, Headphones } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -9,8 +9,6 @@ import { useLang } from '@/i18n/LanguageContext';
 const ContactPage: React.FC = () => {
   const { t } = useLang();
   const channels = [
-    { icon: Mail, title: t('contact.email.t'), info: 'support@eurotransit.eu', sub: t('contact.email.sub') },
-    { icon: Phone, title: t('contact.call.t'), info: 'EuroTransit', sub: t('contact.call.sub') },
     { icon: MapPin, title: t('contact.hq.t'), info: 'Berlin, Germany', sub: t('contact.hq.sub') },
     { icon: Clock, title: t('contact.hours.t'), info: t('contact.hours.info'), sub: t('contact.hours.sub') },
     { icon: Globe, title: t('contact.regional.t'), info: 'London • Paris • Madrid • Amsterdam', sub: t('contact.regional.sub') },
