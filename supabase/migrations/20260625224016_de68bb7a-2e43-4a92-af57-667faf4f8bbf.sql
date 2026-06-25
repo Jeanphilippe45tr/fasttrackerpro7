@@ -1,0 +1,1 @@
+ALTER TABLE public.clients ADD COLUMN IF NOT EXISTS transport_mode text NOT NULL DEFAULT 'road';

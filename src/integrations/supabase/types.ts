@@ -111,6 +111,7 @@ export type Database = {
           shipment_description: string | null
           status: string
           tracking_code: string
+          transport_mode: string
           updated_at: string
         }
         Insert: {
@@ -126,6 +127,7 @@ export type Database = {
           shipment_description?: string | null
           status?: string
           tracking_code: string
+          transport_mode?: string
           updated_at?: string
         }
         Update: {
@@ -141,6 +143,7 @@ export type Database = {
           shipment_description?: string | null
           status?: string
           tracking_code?: string
+          transport_mode?: string
           updated_at?: string
         }
         Relationships: [
