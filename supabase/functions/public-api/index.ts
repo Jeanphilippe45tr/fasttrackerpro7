@@ -1,5 +1,33 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors'
+import webpush from 'npm:web-push@3.6.7'
+
+const VAPID_PUBLIC = Deno.env.get('VAPID_PUBLIC_KEY')
+const VAPID_PRIVATE = Deno.env.get('VAPID_PRIVATE_KEY')
+if (VAPID_PUBLIC && VAPID_PRIVATE) {
+  try { webpush.setVapidDetails('mailto:support@eurotransit.app', VAPID_PUBLIC, VAPID_PRIVATE) } catch { /* ignore */ }
+}
+
+async function notifyAdmin(supabase: any, adminId: string | null, body: string, url: string) {
+  if (!VAPID_PUBLIC || !VAPID_PRIVATE) return
+  let q = supabase.from('push_subscriptions').select('*').eq('subscriber_type', 'admin')
+  q = adminId ? q.eq('admin_id', adminId) : q.is('admin_id', null)
+  const { data: subs } = await q
+  if (!subs?.length) return
+  const payload = { title: 'Nouveau message client', body: body.slice(0, 120), tag: 'admin-chat', url }
+  await Promise.allSettled(subs.map(async (s: any) => {
+    try {
+      await webpush.sendNotification(
+        { endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } },
+        JSON.stringify(payload),
+      )
+    } catch (e: any) {
+      if (e?.statusCode === 404 || e?.statusCode === 410) {
+        await supabase.from('push_subscriptions').delete().eq('endpoint', s.endpoint)
+      }
+    }
+  }))
+}
 
 function json(data: unknown, status = 200) {
   return new Response(JSON.stringify(data), {
