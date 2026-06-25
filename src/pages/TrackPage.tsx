@@ -9,6 +9,7 @@ import TrackingMap from '@/components/TrackingMap';
 import { useApp } from '@/context/AppContext';
 import type { Shipment, Ticket, ChatMessage } from '@/context/AppContext';
 import ChatWidget from '@/components/ChatWidget';
+import PushToggle from '@/components/PushToggle';
 import { generateTicketPdf } from '@/lib/ticketPdf';
 import TicketPreview from '@/components/TicketPreview';
 import { Badge as Bdg } from '@/components/ui/badge';
@@ -154,6 +155,7 @@ const TrackPage: React.FC = () => {
                     <div className="text-right">
                     <div className="text-sm text-muted-foreground">{t('track.eta')}</div>
                       <div className="font-semibold text-foreground">{shipment.estimatedArrival}</div>
+                      <PushToggle subscriberType="client" trackingCode={shipment.trackingNumber} className="mt-2" />
                     </div>
                   </div>
                   {/* Progress bar */}
