@@ -70,6 +70,9 @@ Deno.serve(async (req) => {
         .from('tracking_events').select('event_description, location, event_time')
         .eq('tracking_code', clientRow.tracking_code)
         .order('event_time', { ascending: false })
+      const { data: tickets } = await supabase
+        .from('tickets').select('*').eq('shipment_id', clientRow.id)
+        .order('created_at', { ascending: false })
       // Minimal info only — never expose admin identity.
       return json({
         client: {
@@ -83,6 +86,7 @@ Deno.serve(async (req) => {
           updated_at: clientRow.updated_at,
         },
         events: events ?? [],
+        tickets: tickets ?? [],
       })
     }
     return json({ error: 'not_found' }, 404)
