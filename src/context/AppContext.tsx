@@ -364,7 +364,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         destCoords: null,
         currentCoords: null,
         status: statusMap[c.status] || 'pending',
-        transportMode: 'road',
+        transportMode: (c.transport_mode as Shipment['transportMode']) || 'road',
         progress: (typeof c.progress === 'number')
           ? c.progress
           : (c.status === 'delivered' ? 100 : c.status === 'in_transit' ? 50 : 0),
