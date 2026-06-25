@@ -1,0 +1,1 @@
+ALTER TABLE public.chat_messages DROP CONSTRAINT IF EXISTS chat_messages_shipment_id_fkey;
