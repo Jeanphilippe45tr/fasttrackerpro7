@@ -101,6 +101,7 @@ const ClientDetail: React.FC = () => {
         destination: client.destination,
         status: client.status,
         progress: client.progress ?? 0,
+        transportMode: client.transport_mode ?? 'road',
       });
       toast({ title: t('cd.saved') });
     } catch {
@@ -174,6 +175,18 @@ const ClientDetail: React.FC = () => {
             <div className="space-y-2"><Label>{t('nc.email')}</Label><Input value={client.email || ''} onChange={setField('email')} /></div>
             <div className="space-y-2"><Label>{t('nc.origin')}</Label><Input value={client.origin || ''} onChange={setField('origin')} /></div>
             <div className="space-y-2"><Label>{t('nc.destination')}</Label><Input value={client.destination || ''} onChange={setField('destination')} /></div>
+            <div className="space-y-2">
+              <Label>{t('nc.transportMode')}</Label>
+              <Select value={client.transport_mode || 'road'} onValueChange={setField('transport_mode')}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="road">{t('mode.road')}</SelectItem>
+                  <SelectItem value="sea">{t('mode.sea')}</SelectItem>
+                  <SelectItem value="air">{t('mode.air')}</SelectItem>
+                  <SelectItem value="rail">{t('mode.rail')}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
           <div className="space-y-2"><Label>{t('nc.description')}</Label><Textarea value={client.shipment_description || ''} onChange={setField('shipment_description')} rows={3} /></div>
           <div className="space-y-2">
@@ -202,6 +215,7 @@ const ClientDetail: React.FC = () => {
               origin={client.origin || ''}
               destination={client.destination || ''}
               progress={client.progress ?? 0}
+              transportMode={client.transport_mode || 'road'}
               className="h-[320px] md:h-[420px]"
             />
           </CardContent>

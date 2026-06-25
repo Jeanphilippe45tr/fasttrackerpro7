@@ -56,6 +56,7 @@ async function generateTrackingCode(supabase: any, prefix: string) {
 }
 
 const STATUSES = ['pending', 'in_transit', 'delivered', 'failed']
+const MODES = ['road', 'sea', 'air', 'rail']
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
@@ -116,6 +117,7 @@ Deno.serve(async (req) => {
         const clientName = String(data?.clientName ?? '').trim()
         if (!clientName) return json({ error: 'Client name is required' }, 400)
         const status = STATUSES.includes(data?.status) ? data.status : 'pending'
+        const transportMode = MODES.includes(data?.transportMode) ? data.transportMode : 'road'
         const trackingCode = await generateTrackingCode(supabase, prefix)
         const { data: created, error } = await supabase.from('clients').insert({
           admin_id: adminId,
@@ -127,6 +129,7 @@ Deno.serve(async (req) => {
           origin: String(data?.origin ?? ''),
           destination: String(data?.destination ?? ''),
           status,
+          transport_mode: transportMode,
         }).select('*').single()
         if (error) throw error
         await supabase.from('tracking_events').insert({
@@ -148,6 +151,7 @@ Deno.serve(async (req) => {
         if (data?.origin !== undefined) updates.origin = String(data.origin)
         if (data?.destination !== undefined) updates.destination = String(data.destination)
         if (data?.status !== undefined && STATUSES.includes(data.status)) updates.status = data.status
+        if (data?.transportMode !== undefined && MODES.includes(data.transportMode)) updates.transport_mode = data.transportMode
         if (data?.progress !== undefined) {
           const p = Math.max(0, Math.min(100, Math.round(Number(data.progress) || 0)))
           updates.progress = p
