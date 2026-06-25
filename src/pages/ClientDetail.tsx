@@ -180,10 +180,10 @@ const ClientDetail: React.FC = () => {
               <Select value={client.transport_mode || 'road'} onValueChange={setField('transport_mode')}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="road">🚚 {t('mode.road')}</SelectItem>
-                  <SelectItem value="sea">🚢 {t('mode.sea')}</SelectItem>
-                  <SelectItem value="air">✈️ {t('mode.air')}</SelectItem>
-                  <SelectItem value="rail">🚆 {t('mode.rail')}</SelectItem>
+                  <SelectItem value="road">{t('mode.road')}</SelectItem>
+                  <SelectItem value="sea">{t('mode.sea')}</SelectItem>
+                  <SelectItem value="air">{t('mode.air')}</SelectItem>
+                  <SelectItem value="rail">{t('mode.rail')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
