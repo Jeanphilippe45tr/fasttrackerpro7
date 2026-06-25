@@ -346,7 +346,44 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const { data: res, error } = await supabase.functions.invoke('public-api', {
       body: { action: 'track', data: { trackingNumber: tracking.trim() } },
     });
-    if (error || !res?.shipment) return null;
+    if (error) return null;
+    // New multi-admin client tracking codes return { client, events }.
+    if (res?.client) {
+      const c = res.client;
+      const statusMap: Record<string, Shipment['status']> = {
+        pending: 'pending', in_transit: 'in_transit', delivered: 'delivered', failed: 'cancelled',
+      };
+      const synthetic: Shipment = {
+        id: c.tracking_code,
+        trackingNumber: c.tracking_code,
+        clientName: c.client_name,
+        clientEmail: '',
+        origin: c.origin || '',
+        destination: c.destination || '',
+        originCoords: null,
+        destCoords: null,
+        currentCoords: null,
+        status: statusMap[c.status] || 'pending',
+        transportMode: 'road',
+        progress: c.status === 'delivered' ? 100 : c.status === 'in_transit' ? 50 : 0,
+        estimatedArrival: '',
+        createdAt: (c.created_at || '').split('T')[0] || '',
+        updatedAt: (c.updated_at || '').split('T')[0] || '',
+        weight: '',
+        dimensions: '',
+        packageType: c.shipment_description || 'Standard Box',
+        route: [],
+        history: (res.events ?? []).map((ev: any) => ({
+          id: `${ev.event_time}-${ev.event_description}`,
+          timestamp: new Date(ev.event_time).toLocaleString(),
+          status: '',
+          location: ev.location || '',
+          description: ev.event_description,
+        })),
+      };
+      return { shipment: synthetic, tickets: [], messages: [] };
+    }
+    if (!res?.shipment) return null;
     return {
       shipment: rowToShipment(res.shipment),
       tickets: (res.tickets ?? []).map(rowToTicket),
