@@ -29,6 +29,7 @@ import AdminSpaceDashboard from "./pages/AdminSpaceDashboard";
 import NewClient from "./pages/NewClient";
 import ClientDetail from "./pages/ClientDetail";
 import AdminSettings from "./pages/AdminSettings";
+import AdminMessages from "./pages/AdminMessages";
 import { Navigate } from "react-router-dom";
 
 const queryClient = new QueryClient();
@@ -63,6 +64,7 @@ const App = () => (
             <Route path="/admin/dashboard" element={<RoleRoute role="admin"><AdminSpaceDashboard /></RoleRoute>} />
             <Route path="/admin/clients/new" element={<RoleRoute role="admin"><NewClient /></RoleRoute>} />
             <Route path="/admin/clients/:id" element={<RoleRoute role="admin"><ClientDetail /></RoleRoute>} />
+            <Route path="/admin/messages" element={<RoleRoute role="admin"><AdminMessages /></RoleRoute>} />
             <Route path="/admin/settings" element={<RoleRoute role="admin"><AdminSettings /></RoleRoute>} />
             {/* Legacy shipment tools (kept for existing data) */}
             <Route path="/legacy-admin/login" element={<AdminLogin />} />
