@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Search, Package, MapPin, Clock, AlertCircle, CheckCircle, Pause, MessageSquare, Download, FileText, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -13,6 +13,7 @@ import { generateTicketPdf } from '@/lib/ticketPdf';
 import TicketPreview from '@/components/TicketPreview';
 import { Badge as Bdg } from '@/components/ui/badge';
 import { useLang } from '@/i18n/LanguageContext';
+import { notifyOnNewIncoming } from '@/lib/notify';
 
 const statusConfig: Record<string, { color: string; icon: React.ElementType; label: string }> = {
   pending: { color: 'bg-warning text-warning-foreground', icon: Clock, label: 'Pending' },
@@ -35,6 +36,7 @@ const TrackPage: React.FC = () => {
   const [clientMessages, setClientMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(false);
   const [activeTracking, setActiveTracking] = useState<string>('');
+  const prevAdminCount = useRef<number>(-1);
 
   const clientUnread = shipment
     ? clientMessages.filter(m => m.shipmentId === shipment.id && m.sender === 'admin' && !m.readByClient).length
@@ -72,8 +74,11 @@ const TrackPage: React.FC = () => {
   // Poll client chat messages while a shipment is loaded.
   useEffect(() => {
     if (!activeTracking) return;
+    prevAdminCount.current = -1;
     const interval = setInterval(async () => {
       const msgs = await getClientMessages(activeTracking);
+      const incoming = msgs.filter(m => m.sender === 'admin').length;
+      prevAdminCount.current = notifyOnNewIncoming(prevAdminCount.current, incoming);
       setClientMessages(msgs);
     }, 5000);
     return () => clearInterval(interval);

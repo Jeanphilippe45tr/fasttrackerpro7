@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -22,6 +22,7 @@ import { useLang } from '@/i18n/LanguageContext';
 import TrackingMap from '@/components/TrackingMap';
 import ChatWidget from '@/components/ChatWidget';
 import type { ChatMessage } from '@/context/AppContext';
+import { notifyOnNewIncoming } from '@/lib/notify';
 
 const ClientDetail: React.FC = () => {
   const { id } = useParams();
@@ -36,6 +37,7 @@ const ClientDetail: React.FC = () => {
   const [tickets, setTickets] = useState<any[]>([]);
   const [newEvent, setNewEvent] = useState({ eventDescription: '', location: '' });
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const prevIncoming = useRef<number>(-1);
 
   const mapRows = (rows: any[]): ChatMessage[] => (rows ?? []).map((m) => ({
     id: m.id,
@@ -51,7 +53,10 @@ const ClientDetail: React.FC = () => {
     if (!id) return;
     try {
       const res = await adminInvoke('listMessages', { clientId: id });
-      setChatMessages(mapRows(res.messages));
+      const rows = mapRows(res.messages);
+      const incoming = rows.filter((m) => m.sender === 'client').length;
+      prevIncoming.current = notifyOnNewIncoming(prevIncoming.current, incoming);
+      setChatMessages(rows);
     } catch { /* ignore */ }
   }, [adminInvoke, id]);
 
