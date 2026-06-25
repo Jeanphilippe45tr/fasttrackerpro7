@@ -146,8 +146,8 @@ const TrackingMap: React.FC<TrackingMapProps> = ({
       map.eachLayer((layer) => {
         if (layer instanceof L.Polyline && !(layer instanceof L.Polygon)) map.removeLayer(layer);
       });
-      // full planned route (dashed)
-      L.polyline(line, { color: baseColor, weight: 3, opacity: 0.45, dashArray: '8, 6' }).addTo(map);
+      // full planned route (clearly visible dashed line from origin to destination)
+      L.polyline(line, { color: baseColor, weight: 5, opacity: 0.85, dashArray: '10, 8' }).addTo(map);
 
       // moving package position
       let movePoint: Coords | null = null;
