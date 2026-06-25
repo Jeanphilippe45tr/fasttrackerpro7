@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, Loader2, Trash2, Save, Plus, MapPin, Clock } from 'lucide-react';
+import ClientTicketsManager from '@/components/ClientTicketsManager';
 
 const ClientDetail: React.FC = () => {
   const { id } = useParams();
@@ -26,6 +27,7 @@ const ClientDetail: React.FC = () => {
   const [saving, setSaving] = useState(false);
   const [client, setClient] = useState<any | null>(null);
   const [events, setEvents] = useState<any[]>([]);
+  const [tickets, setTickets] = useState<any[]>([]);
   const [newEvent, setNewEvent] = useState({ eventDescription: '', location: '' });
 
   const load = useCallback(async () => {
@@ -33,6 +35,7 @@ const ClientDetail: React.FC = () => {
       const res = await adminInvoke('getClient', { id });
       setClient(res.client);
       setEvents(res.events ?? []);
+      setTickets(res.tickets ?? []);
     } catch {
       toast({ title: 'Failed to load client', variant: 'destructive' });
       navigate('/admin/dashboard');
@@ -163,6 +166,17 @@ const ClientDetail: React.FC = () => {
           </div>
         </CardContent>
       </Card>
+
+      <div className="mt-6">
+        <ClientTicketsManager
+          clientId={client.id}
+          clientName={client.client_name}
+          trackingCode={client.tracking_code}
+          origin={client.origin || ''}
+          destination={client.destination || ''}
+          initialTickets={tickets}
+        />
+      </div>
     </div>
   );
 };

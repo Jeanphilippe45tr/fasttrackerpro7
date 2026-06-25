@@ -107,7 +107,10 @@ Deno.serve(async (req) => {
         const { data: events } = await supabase
           .from('tracking_events').select('*').eq('tracking_code', c.tracking_code)
           .order('event_time', { ascending: false })
-        return json({ client: c, events: events ?? [] })
+        const { data: tickets } = await supabase
+          .from('tickets').select('*').eq('shipment_id', c.id)
+          .order('created_at', { ascending: false })
+        return json({ client: c, events: events ?? [], tickets: tickets ?? [] })
       }
       case 'createClient': {
         const clientName = String(data?.clientName ?? '').trim()
@@ -169,6 +172,48 @@ Deno.serve(async (req) => {
           location: String(data?.location ?? ''),
           updated_by_admin_id: adminId,
         })
+        if (error) throw error
+        return json({ ok: true })
+      }
+      case 'listTickets': {
+        const c = await ownClient(String(data?.clientId ?? ''))
+        if (!c) return json({ error: 'not_found' }, 404)
+        const { data: tickets } = await supabase
+          .from('tickets').select('*').eq('shipment_id', c.id)
+          .order('created_at', { ascending: false })
+        return json({ tickets: tickets ?? [] })
+      }
+      case 'addTicket': {
+        const c = await ownClient(String(data?.clientId ?? ''))
+        if (!c) return json({ error: 'not_found' }, 404)
+        const ttype = data?.ticketType === 'pending' ? 'pending' : 'paid'
+        const { data: created, error } = await supabase.from('tickets').insert({
+          shipment_id: c.id,
+          ticket_number: String(data?.ticketNumber ?? `TKT-${Date.now()}`),
+          ticket_type: ttype,
+          title: String(data?.title ?? ''),
+          amount: Number(data?.amount ?? 0),
+          currency: String(data?.currency ?? 'EUR'),
+          items: Array.isArray(data?.items) ? data.items : [],
+          notes: String(data?.notes ?? ''),
+          issued_to: String(data?.issuedTo ?? c.client_name),
+          issued_by: String(data?.issuedBy ?? 'EuroTransit Admin'),
+          due_date: data?.dueDate || null,
+          payment_method: String(data?.paymentMethod ?? ''),
+          tax_rate: Number(data?.taxRate ?? 0),
+          discount: Number(data?.discount ?? 0),
+        }).select('*').single()
+        if (error) throw error
+        return json({ ok: true, ticket: created })
+      }
+      case 'deleteTicket': {
+        const ticketId = String(data?.id ?? '')
+        if (!ticketId) return json({ error: 'id required' }, 400)
+        const { data: tk } = await supabase.from('tickets').select('shipment_id').eq('id', ticketId).maybeSingle()
+        if (!tk) return json({ error: 'not_found' }, 404)
+        const owner = await ownClient(String(tk.shipment_id))
+        if (!owner) return json({ error: 'not_found' }, 404)
+        const { error } = await supabase.from('tickets').delete().eq('id', ticketId)
         if (error) throw error
         return json({ ok: true })
       }
