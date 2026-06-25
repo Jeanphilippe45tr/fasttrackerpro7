@@ -103,6 +103,7 @@ Deno.serve(async (req) => {
           read_by_admin: false, read_by_client: true,
         })
         if (error) return json({ error: error.message }, 500)
+        await notifyAdmin(supabase, clientRow.admin_id ?? null, message, `/admin/clients/${clientRow.id}`)
         return json({ ok: true })
       }
       if (action === 'getMessages') {
