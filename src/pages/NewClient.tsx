@@ -23,7 +23,7 @@ const NewClient: React.FC = () => {
   const { t } = useLang();
   const [form, setForm] = useState({
     clientName: '', phone: '', email: '', shipmentDescription: '',
-    origin: '', destination: '', status: 'pending',
+    origin: '', destination: '', status: 'pending', transportMode: 'road',
   });
   const [loading, setLoading] = useState(false);
   const [created, setCreated] = useState<any | null>(null);
@@ -85,6 +85,18 @@ const NewClient: React.FC = () => {
               <div className="space-y-2">
                 <Label htmlFor="destination">{t('nc.destination')}</Label>
                 <Input id="destination" value={form.destination} onChange={set('destination')} placeholder="e.g. Berlin, Germany" />
+              </div>
+              <div className="space-y-2">
+                <Label>{t('nc.transportMode')}</Label>
+                <Select value={form.transportMode} onValueChange={set('transportMode')}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="road">🚚 {t('mode.road')}</SelectItem>
+                    <SelectItem value="sea">🚢 {t('mode.sea')}</SelectItem>
+                    <SelectItem value="air">✈️ {t('mode.air')}</SelectItem>
+                    <SelectItem value="rail">🚆 {t('mode.rail')}</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
             <div className="space-y-2">
