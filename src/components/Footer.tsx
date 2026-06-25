@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Mail, Phone, MapPin } from 'lucide-react';
+import { MapPin } from 'lucide-react';
 import { useLang } from '@/i18n/LanguageContext';
 import logo from '@/assets/logo.png';
 
@@ -43,8 +43,6 @@ const Footer: React.FC = () => {
         <div>
           <h4 className="font-semibold mb-4">{t('footer.contactInfo')}</h4>
           <div className="space-y-3 text-sm opacity-80">
-            <div className="flex items-center gap-2"><Mail className="w-4 h-4" /> support@eurotransit.eu</div>
-            <div className="flex items-center gap-2"><Phone className="w-4 h-4" /> +49 30 5555 0000</div>
             <div className="flex items-center gap-2"><MapPin className="w-4 h-4" /> Logistikstraße 12, 10115 Berlin, DE</div>
           </div>
         </div>
