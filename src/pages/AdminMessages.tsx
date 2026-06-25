@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,6 +9,7 @@ import { ArrowLeft, Loader2, MessageSquare, Search } from 'lucide-react';
 import ChatWidget from '@/components/ChatWidget';
 import type { ChatMessage } from '@/context/AppContext';
 import { useLang } from '@/i18n/LanguageContext';
+import { notifyOnNewIncoming } from '@/lib/notify';
 
 const mapRows = (rows: any[]): ChatMessage[] => (rows ?? []).map((m) => ({
   id: m.id,
@@ -30,6 +31,7 @@ const AdminMessages: React.FC = () => {
   const [q, setQ] = useState('');
   const [active, setActive] = useState<any | null>(null);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const prevTotalUnread = useRef<number>(-1);
 
   const loadClients = useCallback(async () => {
     try {
@@ -45,11 +47,20 @@ const AdminMessages: React.FC = () => {
         } catch { counts[c.id] = 0; }
       }));
       setUnread(counts);
+      const totalUnread = Object.values(counts).reduce((a, b) => a + b, 0);
+      prevTotalUnread.current = notifyOnNewIncoming(prevTotalUnread.current, totalUnread);
     } catch { /* ignore */ }
     finally { setLoading(false); }
   }, [adminInvoke]);
 
   useEffect(() => { loadClients(); }, [loadClients]);
+
+  // Poll all clients for new incoming messages so the sound plays even when no
+  // conversation is open.
+  useEffect(() => {
+    const interval = setInterval(loadClients, 8000);
+    return () => clearInterval(interval);
+  }, [loadClients]);
 
   const loadMessages = useCallback(async (clientId: string) => {
     try {
