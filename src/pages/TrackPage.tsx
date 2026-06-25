@@ -74,6 +74,7 @@ const TrackPage: React.FC = () => {
   // Poll client chat messages while a shipment is loaded.
   useEffect(() => {
     if (!activeTracking) return;
+    prevAdminCount.current = -1;
     const interval = setInterval(async () => {
       const msgs = await getClientMessages(activeTracking);
       const incoming = msgs.filter(m => m.sender === 'admin').length;
