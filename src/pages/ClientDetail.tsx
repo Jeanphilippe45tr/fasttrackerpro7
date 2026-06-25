@@ -215,6 +215,7 @@ const ClientDetail: React.FC = () => {
               origin={client.origin || ''}
               destination={client.destination || ''}
               progress={client.progress ?? 0}
+              transportMode={client.transport_mode || 'road'}
               className="h-[320px] md:h-[420px]"
             />
           </CardContent>
