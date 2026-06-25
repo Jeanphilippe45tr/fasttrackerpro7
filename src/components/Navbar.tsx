@@ -1,18 +1,18 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Shield, MessageSquare } from 'lucide-react';
+import { Menu, X, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useApp } from '@/context/AppContext';
+import { useAuth } from '@/context/AuthContext';
 import { useLang } from '@/i18n/LanguageContext';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import logo from '@/assets/logo.png';
 
 const Navbar: React.FC = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const { isAdminLoggedIn, logoutAdmin, messages } = useApp();
+  const { user, logout } = useAuth();
   const { t } = useLang();
   const location = useLocation();
-  const adminUnread = messages.filter(m => m.sender === 'client' && !m.readByAdmin).length;
+  const dashPath = user?.role === 'super_admin' ? '/super-admin/dashboard' : '/admin/dashboard';
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -53,27 +53,17 @@ const Navbar: React.FC = () => {
 
           <div className="hidden md:flex items-center gap-2">
             <LanguageSwitcher />
-            {isAdminLoggedIn ? (
+            {user ? (
               <>
-                <Link to="/admin">
+                <Link to={dashPath}>
                   <Button variant="outline" size="sm" className="gap-1">
                     <Shield className="w-4 h-4" /> {t('nav.dashboard')}
                   </Button>
                 </Link>
-                <Link to="/admin/chat">
-                  <Button variant="outline" size="sm" className="gap-1">
-                    <MessageSquare className="w-4 h-4" /> {t('nav.chat')}
-                    {adminUnread > 0 && (
-                      <span className="ml-1 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold">
-                        {adminUnread}
-                      </span>
-                    )}
-                  </Button>
-                </Link>
-                <Button variant="ghost" size="sm" onClick={logoutAdmin}>{t('nav.logout')}</Button>
+                <Button variant="ghost" size="sm" onClick={logout}>{t('nav.logout')}</Button>
               </>
             ) : (
-              <Link to="/admin/login">
+              <Link to="/login">
                 <Button size="sm" className="gap-1 bg-primary text-primary-foreground hover:bg-primary/90">
                   <Shield className="w-4 h-4" /> {t('nav.admin')}
                 </Button>
@@ -104,13 +94,13 @@ const Navbar: React.FC = () => {
               </Link>
             ))}
             <div className="pt-2 border-t border-border space-y-1">
-              {isAdminLoggedIn ? (
+              {user ? (
                 <>
-                  <Link to="/admin" onClick={() => setMobileOpen(false)} className="block px-3 py-2 text-sm font-medium text-muted-foreground">{t('nav.dashboard')}</Link>
-                  <button onClick={() => { logoutAdmin(); setMobileOpen(false); }} className="block px-3 py-2 text-sm font-medium text-muted-foreground">{t('nav.logout')}</button>
+                  <Link to={dashPath} onClick={() => setMobileOpen(false)} className="block px-3 py-2 text-sm font-medium text-muted-foreground">{t('nav.dashboard')}</Link>
+                  <button onClick={() => { logout(); setMobileOpen(false); }} className="block px-3 py-2 text-sm font-medium text-muted-foreground">{t('nav.logout')}</button>
                 </>
               ) : (
-                <Link to="/admin/login" onClick={() => setMobileOpen(false)} className="block px-3 py-2 text-sm font-medium text-muted-foreground">{t('nav.adminLogin')}</Link>
+                <Link to="/login" onClick={() => setMobileOpen(false)} className="block px-3 py-2 text-sm font-medium text-muted-foreground">{t('nav.adminLogin')}</Link>
               )}
             </div>
           </div>

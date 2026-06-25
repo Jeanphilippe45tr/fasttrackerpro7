@@ -61,7 +61,32 @@ Deno.serve(async (req) => {
   const { data: shipRow } = await supabase
     .from('shipments').select('*').ilike('tracking_number', trackingNumber).maybeSingle()
 
-  if (!shipRow) return json({ error: 'not_found' }, 404)
+  if (!shipRow) {
+    // Fall back to the multi-admin clients tracking codes.
+    const { data: clientRow } = await supabase
+      .from('clients').select('*').ilike('tracking_code', trackingNumber).maybeSingle()
+    if (clientRow) {
+      const { data: events } = await supabase
+        .from('tracking_events').select('event_description, location, event_time')
+        .eq('tracking_code', clientRow.tracking_code)
+        .order('event_time', { ascending: false })
+      // Minimal info only — never expose admin identity.
+      return json({
+        client: {
+          tracking_code: clientRow.tracking_code,
+          client_name: clientRow.client_name,
+          shipment_description: clientRow.shipment_description,
+          origin: clientRow.origin,
+          destination: clientRow.destination,
+          status: clientRow.status,
+          created_at: clientRow.created_at,
+          updated_at: clientRow.updated_at,
+        },
+        events: events ?? [],
+      })
+    }
+    return json({ error: 'not_found' }, 404)
+  }
 
   try {
     switch (action) {

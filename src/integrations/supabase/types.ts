@@ -14,6 +14,51 @@ export type Database = {
   }
   public: {
     Tables: {
+      admins: {
+        Row: {
+          admin_prefix: string
+          company_name: string | null
+          created_at: string
+          created_by_super_admin: string | null
+          email: string
+          id: string
+          is_active: boolean
+          must_change_password: boolean
+          name: string
+          password_hash: string
+          phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          admin_prefix: string
+          company_name?: string | null
+          created_at?: string
+          created_by_super_admin?: string | null
+          email?: string
+          id?: string
+          is_active?: boolean
+          must_change_password?: boolean
+          name: string
+          password_hash: string
+          phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          admin_prefix?: string
+          company_name?: string | null
+          created_at?: string
+          created_by_super_admin?: string | null
+          email?: string
+          id?: string
+          is_active?: boolean
+          must_change_password?: boolean
+          name?: string
+          password_hash?: string
+          phone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       chat_messages: {
         Row: {
           created_at: string
@@ -48,6 +93,59 @@ export type Database = {
             columns: ["shipment_id"]
             isOneToOne: false
             referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      clients: {
+        Row: {
+          admin_id: string
+          client_name: string
+          created_at: string
+          destination: string | null
+          email: string | null
+          id: string
+          origin: string | null
+          phone: string | null
+          shipment_description: string | null
+          status: string
+          tracking_code: string
+          updated_at: string
+        }
+        Insert: {
+          admin_id: string
+          client_name: string
+          created_at?: string
+          destination?: string | null
+          email?: string | null
+          id?: string
+          origin?: string | null
+          phone?: string | null
+          shipment_description?: string | null
+          status?: string
+          tracking_code: string
+          updated_at?: string
+        }
+        Update: {
+          admin_id?: string
+          client_name?: string
+          created_at?: string
+          destination?: string | null
+          email?: string | null
+          id?: string
+          origin?: string | null
+          phone?: string | null
+          shipment_description?: string | null
+          status?: string
+          tracking_code?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "clients_admin_id_fkey"
+            columns: ["admin_id"]
+            isOneToOne: false
+            referencedRelation: "admins"
             referencedColumns: ["id"]
           },
         ]
@@ -124,6 +222,30 @@ export type Database = {
         }
         Relationships: []
       }
+      super_admins: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          name: string
+          password_hash: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string
+          id?: string
+          name: string
+          password_hash: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string
+          password_hash?: string
+        }
+        Relationships: []
+      }
       tickets: {
         Row: {
           amount: number
@@ -181,6 +303,48 @@ export type Database = {
           ticket_type?: string
           title?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      tracking_events: {
+        Row: {
+          event_description: string
+          event_time: string
+          id: string
+          location: string | null
+          tracking_code: string
+          updated_by_admin_id: string | null
+        }
+        Insert: {
+          event_description?: string
+          event_time?: string
+          id?: string
+          location?: string | null
+          tracking_code: string
+          updated_by_admin_id?: string | null
+        }
+        Update: {
+          event_description?: string
+          event_time?: string
+          id?: string
+          location?: string | null
+          tracking_code?: string
+          updated_by_admin_id?: string | null
+        }
+        Relationships: []
+      }
+      used_tracking_codes: {
+        Row: {
+          code: string
+          created_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
         }
         Relationships: []
       }
