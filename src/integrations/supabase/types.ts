@@ -107,6 +107,7 @@ export type Database = {
           id: string
           origin: string | null
           phone: string | null
+          progress: number | null
           shipment_description: string | null
           status: string
           tracking_code: string
@@ -121,6 +122,7 @@ export type Database = {
           id?: string
           origin?: string | null
           phone?: string | null
+          progress?: number | null
           shipment_description?: string | null
           status?: string
           tracking_code: string
@@ -135,6 +137,7 @@ export type Database = {
           id?: string
           origin?: string | null
           phone?: string | null
+          progress?: number | null
           shipment_description?: string | null
           status?: string
           tracking_code?: string

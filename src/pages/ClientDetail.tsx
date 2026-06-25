@@ -17,12 +17,15 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, Loader2, Trash2, Save, Plus, MapPin, Clock } from 'lucide-react';
 import ClientTicketsManager from '@/components/ClientTicketsManager';
+import { Slider } from '@/components/ui/slider';
+import { useLang } from '@/i18n/LanguageContext';
 
 const ClientDetail: React.FC = () => {
   const { id } = useParams();
   const { adminInvoke } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t } = useLang();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [client, setClient] = useState<any | null>(null);
@@ -37,12 +40,12 @@ const ClientDetail: React.FC = () => {
       setEvents(res.events ?? []);
       setTickets(res.tickets ?? []);
     } catch {
-      toast({ title: 'Failed to load client', variant: 'destructive' });
+      toast({ title: t('cd.loadFailed'), variant: 'destructive' });
       navigate('/admin/dashboard');
     } finally {
       setLoading(false);
     }
-  }, [adminInvoke, id, navigate, toast]);
+  }, [adminInvoke, id, navigate, toast, t]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -60,10 +63,11 @@ const ClientDetail: React.FC = () => {
         origin: client.origin,
         destination: client.destination,
         status: client.status,
+        progress: client.progress ?? 0,
       });
-      toast({ title: 'Saved' });
+      toast({ title: t('cd.saved') });
     } catch {
-      toast({ title: 'Failed to save', variant: 'destructive' });
+      toast({ title: t('cd.saveFailed'), variant: 'destructive' });
     } finally {
       setSaving(false);
     }
@@ -78,7 +82,7 @@ const ClientDetail: React.FC = () => {
 
   const remove = async () => {
     await adminInvoke('deleteClient', { id });
-    toast({ title: 'Client deleted' });
+    toast({ title: t('cd.deleted') });
     navigate('/admin/dashboard');
   };
 
@@ -88,7 +92,7 @@ const ClientDetail: React.FC = () => {
   return (
     <div className="container mx-auto px-4 py-10 max-w-3xl">
       <Button variant="ghost" className="mb-4" onClick={() => navigate('/admin/dashboard')}>
-        <ArrowLeft className="w-4 h-4 mr-2" /> Back
+        <ArrowLeft className="w-4 h-4 mr-2" /> {t('common.back')}
       </Button>
 
       <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
@@ -98,60 +102,72 @@ const ClientDetail: React.FC = () => {
         </div>
         <AlertDialog>
           <AlertDialogTrigger asChild>
-            <Button variant="outline" className="text-destructive"><Trash2 className="w-4 h-4 mr-2" /> Delete</Button>
+            <Button variant="outline" className="text-destructive"><Trash2 className="w-4 h-4 mr-2" /> {t('cd.delete')}</Button>
           </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Delete this client?</AlertDialogTitle>
-              <AlertDialogDescription>The tracking code will never be reused. This cannot be undone.</AlertDialogDescription>
+              <AlertDialogTitle>{t('cd.deleteTitle')}</AlertDialogTitle>
+              <AlertDialogDescription>{t('cd.deleteDesc')}</AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={remove}>Delete</AlertDialogAction>
+              <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
+              <AlertDialogAction onClick={remove}>{t('cd.delete')}</AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
       </div>
 
       <Card className="mb-6">
-        <CardHeader><CardTitle>Shipment details</CardTitle></CardHeader>
+        <CardHeader><CardTitle>{t('cd.shipmentDetails')}</CardTitle></CardHeader>
         <CardContent className="space-y-4">
           <div className="grid sm:grid-cols-2 gap-4">
-            <div className="space-y-2"><Label>Client name</Label><Input value={client.client_name || ''} onChange={setField('client_name')} /></div>
-            <div className="space-y-2"><Label>Status</Label>
+            <div className="space-y-2"><Label>{t('nc.clientName')}</Label><Input value={client.client_name || ''} onChange={setField('client_name')} /></div>
+            <div className="space-y-2"><Label>{t('nc.status')}</Label>
               <Select value={client.status} onValueChange={setField('status')}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="pending">Pending</SelectItem>
-                  <SelectItem value="in_transit">In transit</SelectItem>
-                  <SelectItem value="delivered">Delivered</SelectItem>
-                  <SelectItem value="failed">Failed</SelectItem>
+                  <SelectItem value="pending">{t('opt.pending')}</SelectItem>
+                  <SelectItem value="in_transit">{t('opt.in_transit')}</SelectItem>
+                  <SelectItem value="delivered">{t('opt.delivered')}</SelectItem>
+                  <SelectItem value="failed">{t('opt.failed')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-2"><Label>Phone</Label><Input value={client.phone || ''} onChange={setField('phone')} /></div>
-            <div className="space-y-2"><Label>Email</Label><Input value={client.email || ''} onChange={setField('email')} /></div>
-            <div className="space-y-2"><Label>Origin</Label><Input value={client.origin || ''} onChange={setField('origin')} /></div>
-            <div className="space-y-2"><Label>Destination</Label><Input value={client.destination || ''} onChange={setField('destination')} /></div>
+            <div className="space-y-2"><Label>{t('nc.phone')}</Label><Input value={client.phone || ''} onChange={setField('phone')} /></div>
+            <div className="space-y-2"><Label>{t('nc.email')}</Label><Input value={client.email || ''} onChange={setField('email')} /></div>
+            <div className="space-y-2"><Label>{t('nc.origin')}</Label><Input value={client.origin || ''} onChange={setField('origin')} /></div>
+            <div className="space-y-2"><Label>{t('nc.destination')}</Label><Input value={client.destination || ''} onChange={setField('destination')} /></div>
           </div>
-          <div className="space-y-2"><Label>Description</Label><Textarea value={client.shipment_description || ''} onChange={setField('shipment_description')} rows={3} /></div>
+          <div className="space-y-2"><Label>{t('nc.description')}</Label><Textarea value={client.shipment_description || ''} onChange={setField('shipment_description')} rows={3} /></div>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <Label>{t('cd.progress')}</Label>
+              <span className="text-sm font-semibold text-secondary">{client.progress ?? 0}%</span>
+            </div>
+            <Slider value={[client.progress ?? 0]} min={0} max={100} step={1}
+              onValueChange={(v) => setClient({ ...client, progress: v[0] })} />
+            <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
+              <div className="h-full bg-secondary rounded-full transition-all" style={{ width: `${client.progress ?? 0}%` }} />
+            </div>
+            <p className="text-xs text-muted-foreground">{t('cd.progressHint')}</p>
+          </div>
           <Button onClick={save} disabled={saving}>
-            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Save className="w-4 h-4 mr-2" /> Save changes</>}
+            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Save className="w-4 h-4 mr-2" /> {t('cd.save')}</>}
           </Button>
         </CardContent>
       </Card>
 
       <Card>
-        <CardHeader><CardTitle>Tracking timeline</CardTitle></CardHeader>
+        <CardHeader><CardTitle>{t('cd.timeline')}</CardTitle></CardHeader>
         <CardContent className="space-y-4">
           <div className="grid sm:grid-cols-[1fr,1fr,auto] gap-2 items-end">
-            <div className="space-y-2"><Label>Event</Label><Input value={newEvent.eventDescription} onChange={(e) => setNewEvent({ ...newEvent, eventDescription: e.target.value })} placeholder="e.g. Arrived at hub" /></div>
-            <div className="space-y-2"><Label>Location</Label><Input value={newEvent.location} onChange={(e) => setNewEvent({ ...newEvent, location: e.target.value })} placeholder="e.g. Lyon" /></div>
-            <Button onClick={addEvent}><Plus className="w-4 h-4 mr-2" /> Add</Button>
+            <div className="space-y-2"><Label>{t('cd.event')}</Label><Input value={newEvent.eventDescription} onChange={(e) => setNewEvent({ ...newEvent, eventDescription: e.target.value })} placeholder="e.g. Arrived at hub" /></div>
+            <div className="space-y-2"><Label>{t('cd.location')}</Label><Input value={newEvent.location} onChange={(e) => setNewEvent({ ...newEvent, location: e.target.value })} placeholder="e.g. Lyon" /></div>
+            <Button onClick={addEvent}><Plus className="w-4 h-4 mr-2" /> {t('cd.add')}</Button>
           </div>
           <div className="space-y-3 pt-2">
             {events.length === 0 ? (
-              <p className="text-muted-foreground text-sm">No events yet.</p>
+              <p className="text-muted-foreground text-sm">{t('cd.noEvents')}</p>
             ) : events.map((ev) => (
               <div key={ev.id} className="flex gap-3 border-l-2 border-primary/40 pl-4 py-1">
                 <div>

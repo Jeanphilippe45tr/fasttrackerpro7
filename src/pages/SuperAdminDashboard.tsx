@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { UserPlus, Trash2, LogOut, Users, Eye, Loader2, Shield } from 'lucide-react';
+import { useLang } from '@/i18n/LanguageContext';
 
 interface AdminRow {
   id: string; name: string; email: string; phone: string;
@@ -26,6 +27,7 @@ const SuperAdminDashboard: React.FC = () => {
   const { superInvoke, logout, user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t } = useLang();
   const [admins, setAdmins] = useState<AdminRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [viewClients, setViewClients] = useState<{ name: string; clients: any[] } | null>(null);
@@ -45,13 +47,13 @@ const SuperAdminDashboard: React.FC = () => {
 
   const toggleActive = async (a: AdminRow) => {
     await superInvoke('toggleActive', { id: a.id, isActive: !a.is_active });
-    toast({ title: a.is_active ? 'Admin deactivated' : 'Admin reactivated' });
+    toast({ title: a.is_active ? t('sa.deactivate') : t('sa.activate') });
     load();
   };
 
   const deleteAdmin = async (a: AdminRow) => {
     await superInvoke('deleteAdmin', { id: a.id });
-    toast({ title: 'Admin deleted' });
+    toast({ title: t('cd.deleted') });
     load();
   };
 
@@ -68,53 +70,53 @@ const SuperAdminDashboard: React.FC = () => {
             <Shield className="w-6 h-6" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold">Super Admin</h1>
-            <p className="text-sm text-muted-foreground">Welcome, {user?.name}</p>
+            <h1 className="text-2xl font-bold">{t('sa.title')}</h1>
+            <p className="text-sm text-muted-foreground">{t('sa.welcome')}, {user?.name}</p>
           </div>
         </div>
         <div className="flex gap-2">
           <Button onClick={() => navigate('/super-admin/create-admin')}>
-            <UserPlus className="w-4 h-4 mr-2" /> Create admin
+            <UserPlus className="w-4 h-4 mr-2" /> {t('sa.createAdmin')}
           </Button>
           <Button variant="outline" onClick={() => { logout(); navigate('/login'); }}>
-            <LogOut className="w-4 h-4 mr-2" /> Logout
+            <LogOut className="w-4 h-4 mr-2" /> {t('adm.dash.logout')}
           </Button>
         </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
         <Card><CardContent className="p-5">
-          <p className="text-sm text-muted-foreground">Total admins</p>
+          <p className="text-sm text-muted-foreground">{t('sa.total')}</p>
           <p className="text-3xl font-bold">{admins.length}</p>
         </CardContent></Card>
         <Card><CardContent className="p-5">
-          <p className="text-sm text-muted-foreground">Active</p>
+          <p className="text-sm text-muted-foreground">{t('sa.active')}</p>
           <p className="text-3xl font-bold">{admins.filter(a => a.is_active).length}</p>
         </CardContent></Card>
         <Card><CardContent className="p-5">
-          <p className="text-sm text-muted-foreground">Inactive</p>
+          <p className="text-sm text-muted-foreground">{t('sa.inactive')}</p>
           <p className="text-3xl font-bold">{admins.filter(a => !a.is_active).length}</p>
         </CardContent></Card>
       </div>
 
       <Card>
-        <CardHeader><CardTitle className="flex items-center gap-2"><Users className="w-5 h-5" /> All admins</CardTitle></CardHeader>
+        <CardHeader><CardTitle className="flex items-center gap-2"><Users className="w-5 h-5" /> {t('sa.allAdmins')}</CardTitle></CardHeader>
         <CardContent>
           {loading ? (
             <div className="py-10 flex justify-center"><Loader2 className="w-6 h-6 animate-spin text-muted-foreground" /></div>
           ) : admins.length === 0 ? (
-            <p className="text-muted-foreground py-6 text-center">No admins yet. Create your first admin.</p>
+            <p className="text-muted-foreground py-6 text-center">{t('sa.noAdmins')}</p>
           ) : (
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Prefix</TableHead>
-                    <TableHead>Created</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead>{t('sa.name')}</TableHead>
+                    <TableHead>{t('sa.email')}</TableHead>
+                    <TableHead>{t('sa.prefix')}</TableHead>
+                    <TableHead>{t('sa.created')}</TableHead>
+                    <TableHead>{t('sa.status')}</TableHead>
+                    <TableHead className="text-right">{t('sa.actions')}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -126,7 +128,7 @@ const SuperAdminDashboard: React.FC = () => {
                       <TableCell className="text-muted-foreground">{new Date(a.created_at).toLocaleDateString()}</TableCell>
                       <TableCell>
                         <Badge variant={a.is_active ? 'default' : 'outline'}>
-                          {a.is_active ? 'Active' : 'Inactive'}
+                          {a.is_active ? t('sa.active') : t('sa.inactive')}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right space-x-1 whitespace-nowrap">
@@ -134,7 +136,7 @@ const SuperAdminDashboard: React.FC = () => {
                           <Eye className="w-4 h-4" />
                         </Button>
                         <Button size="sm" variant="outline" onClick={() => toggleActive(a)}>
-                          {a.is_active ? 'Deactivate' : 'Activate'}
+                          {a.is_active ? t('sa.deactivate') : t('sa.activate')}
                         </Button>
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
@@ -143,13 +145,11 @@ const SuperAdminDashboard: React.FC = () => {
                           <AlertDialogContent>
                             <AlertDialogHeader>
                               <AlertDialogTitle>Delete {a.name}?</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                This permanently removes the admin and all their clients. This cannot be undone.
-                              </AlertDialogDescription>
+                              <AlertDialogDescription>{t('sa.deleteDesc')}</AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction onClick={() => deleteAdmin(a)}>Delete</AlertDialogAction>
+                              <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => deleteAdmin(a)}>{t('common.delete')}</AlertDialogAction>
                             </AlertDialogFooter>
                           </AlertDialogContent>
                         </AlertDialog>
@@ -165,15 +165,15 @@ const SuperAdminDashboard: React.FC = () => {
 
       <Dialog open={!!viewClients} onOpenChange={(o) => !o && setViewClients(null)}>
         <DialogContent className="max-w-2xl">
-          <DialogHeader><DialogTitle>{viewClients?.name}'s clients</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{viewClients?.name} — {t('sa.clientsTitle')}</DialogTitle></DialogHeader>
           {viewClients && viewClients.clients.length === 0 ? (
-            <p className="text-muted-foreground py-4">No clients yet.</p>
+            <p className="text-muted-foreground py-4">{t('sa.noClientsYet')}</p>
           ) : (
             <div className="overflow-x-auto max-h-[60vh]">
               <Table>
                 <TableHeader><TableRow>
-                  <TableHead>Client</TableHead><TableHead>Tracking</TableHead>
-                  <TableHead>Route</TableHead><TableHead>Status</TableHead>
+                  <TableHead>{t('adm.dash.client')}</TableHead><TableHead>{t('adm.dash.trackingCode')}</TableHead>
+                  <TableHead>{t('adm.dash.route')}</TableHead><TableHead>{t('adm.dash.status')}</TableHead>
                 </TableRow></TableHeader>
                 <TableBody>
                   {viewClients?.clients.map((c) => (

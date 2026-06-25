@@ -82,6 +82,7 @@ Deno.serve(async (req) => {
           origin: clientRow.origin,
           destination: clientRow.destination,
           status: clientRow.status,
+          progress: clientRow.progress,
           created_at: clientRow.created_at,
           updated_at: clientRow.updated_at,
         },

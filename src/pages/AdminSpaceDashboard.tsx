@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
 import { UserPlus, LogOut, Settings, Loader2, Package, Search, Copy } from 'lucide-react';
+import { useLang } from '@/i18n/LanguageContext';
 
 const statusColor: Record<string, string> = {
   pending: 'outline', in_transit: 'default', delivered: 'secondary', failed: 'destructive',
@@ -19,6 +20,7 @@ const AdminSpaceDashboard: React.FC = () => {
   const { adminInvoke, logout, user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t } = useLang();
   const [clients, setClients] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState('');
@@ -28,11 +30,11 @@ const AdminSpaceDashboard: React.FC = () => {
       const res = await adminInvoke('listClients');
       setClients(res.clients ?? []);
     } catch {
-      toast({ title: 'Failed to load clients', variant: 'destructive' });
+      toast({ title: t('adm.dash.noClients'), variant: 'destructive' });
     } finally {
       setLoading(false);
     }
-  }, [adminInvoke, toast]);
+  }, [adminInvoke, toast, t]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -48,21 +50,21 @@ const AdminSpaceDashboard: React.FC = () => {
             <Package className="w-6 h-6" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold">My Dashboard</h1>
+            <h1 className="text-2xl font-bold">{t('adm.dash.title')}</h1>
             <p className="text-sm text-muted-foreground">
-              {user?.name} · prefix <span className="font-mono">{user?.prefix}</span>
+              {user?.name} · {t('adm.dash.prefix')} <span className="font-mono">{user?.prefix}</span>
             </p>
           </div>
         </div>
         <div className="flex gap-2">
           <Button onClick={() => navigate('/admin/clients/new')}>
-            <UserPlus className="w-4 h-4 mr-2" /> Add client
+            <UserPlus className="w-4 h-4 mr-2" /> {t('adm.dash.addClient')}
           </Button>
           <Button variant="outline" onClick={() => navigate('/admin/settings')}>
-            <Settings className="w-4 h-4 mr-2" /> Settings
+            <Settings className="w-4 h-4 mr-2" /> {t('adm.dash.settings')}
           </Button>
           <Button variant="outline" onClick={() => { logout(); navigate('/login'); }}>
-            <LogOut className="w-4 h-4 mr-2" /> Logout
+            <LogOut className="w-4 h-4 mr-2" /> {t('adm.dash.logout')}
           </Button>
         </div>
       </div>
@@ -70,7 +72,7 @@ const AdminSpaceDashboard: React.FC = () => {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
         {(['pending', 'in_transit', 'delivered', 'failed'] as const).map((s) => (
           <Card key={s}><CardContent className="p-5">
-            <p className="text-sm text-muted-foreground capitalize">{s.replace('_', ' ')}</p>
+            <p className="text-sm text-muted-foreground">{t(`status.${s === 'failed' ? 'cancelled' : s}`)}</p>
             <p className="text-3xl font-bold">{clients.filter((c) => c.status === s).length}</p>
           </CardContent></Card>
         ))}
@@ -78,24 +80,24 @@ const AdminSpaceDashboard: React.FC = () => {
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between gap-4">
-          <CardTitle>My clients</CardTitle>
+          <CardTitle>{t('adm.dash.myClients')}</CardTitle>
           <div className="relative w-full max-w-xs">
             <Search className="absolute left-2.5 top-2.5 w-4 h-4 text-muted-foreground" />
-            <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search..." className="pl-8" />
+            <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t('adm.dash.search')} className="pl-8" />
           </div>
         </CardHeader>
         <CardContent>
           {loading ? (
             <div className="py-10 flex justify-center"><Loader2 className="w-6 h-6 animate-spin text-muted-foreground" /></div>
           ) : filtered.length === 0 ? (
-            <p className="text-muted-foreground py-6 text-center">No clients found.</p>
+            <p className="text-muted-foreground py-6 text-center">{t('adm.dash.noClients')}</p>
           ) : (
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader><TableRow>
-                  <TableHead>Client</TableHead><TableHead>Tracking code</TableHead>
-                  <TableHead>Route</TableHead><TableHead>Status</TableHead>
-                  <TableHead className="text-right">Action</TableHead>
+                  <TableHead>{t('adm.dash.client')}</TableHead><TableHead>{t('adm.dash.trackingCode')}</TableHead>
+                  <TableHead>{t('adm.dash.route')}</TableHead><TableHead>{t('adm.dash.status')}</TableHead>
+                  <TableHead className="text-right">{t('adm.dash.action')}</TableHead>
                 </TableRow></TableHeader>
                 <TableBody>
                   {filtered.map((c) => (
@@ -104,14 +106,14 @@ const AdminSpaceDashboard: React.FC = () => {
                       <TableCell>
                         <span className="font-mono text-sm">{c.tracking_code}</span>
                         <Button size="icon" variant="ghost" className="h-6 w-6 ml-1"
-                          onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(c.tracking_code); toast({ title: 'Tracking code copied' }); }}>
+                          onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(c.tracking_code); toast({ title: t('adm.dash.copied') }); }}>
                           <Copy className="w-3 h-3" />
                         </Button>
                       </TableCell>
                       <TableCell className="text-muted-foreground">{c.origin || '—'} → {c.destination || '—'}</TableCell>
-                      <TableCell><Badge variant={(statusColor[c.status] as any) || 'outline'}>{c.status.replace('_', ' ')}</Badge></TableCell>
+                      <TableCell><Badge variant={(statusColor[c.status] as any) || 'outline'}>{t(`status.${c.status === 'failed' ? 'cancelled' : c.status}`)}</Badge></TableCell>
                       <TableCell className="text-right">
-                        <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); navigate(`/admin/clients/${c.id}`); }}>Manage</Button>
+                        <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); navigate(`/admin/clients/${c.id}`); }}>{t('adm.dash.manage')}</Button>
                       </TableCell>
                     </TableRow>
                   ))}
