@@ -87,15 +87,7 @@ export type Database = {
           sender?: string
           shipment_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "chat_messages_shipment_id_fkey"
-            columns: ["shipment_id"]
-            isOneToOne: false
-            referencedRelation: "shipments"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       clients: {
         Row: {
