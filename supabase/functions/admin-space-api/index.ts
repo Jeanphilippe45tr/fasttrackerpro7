@@ -268,6 +268,12 @@ Deno.serve(async (req) => {
           read_by_admin: true, read_by_client: false,
         })
         if (error) throw error
+        await sendPush(supabase, 'tracking_code', c.tracking_code, {
+          title: 'Nouveau message de votre transporteur',
+          body: message.slice(0, 120),
+          tag: `chat-${c.id}`,
+          url: '/track',
+        })
         return json({ ok: true })
       }
       case 'markRead': {
