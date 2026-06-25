@@ -107,6 +107,7 @@ Deno.serve(async (req) => {
           destination: clientRow.destination,
           status: clientRow.status,
           progress: clientRow.progress,
+          transport_mode: clientRow.transport_mode,
           created_at: clientRow.created_at,
           updated_at: clientRow.updated_at,
         },
