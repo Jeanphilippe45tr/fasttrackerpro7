@@ -1,6 +1,23 @@
 import jsPDF from 'jspdf';
 import QRCode from 'qrcode';
 import type { Ticket } from '@/context/AppContext';
+import { translations, type Lang } from '@/i18n/translations';
+
+const getLang = (): Lang => {
+  try {
+    const s = localStorage.getItem('lang');
+    if (s === 'fr' || s === 'de' || s === 'en') return s;
+  } catch { /* ignore */ }
+  return 'en';
+};
+const tr = (key: string) => {
+  const l = getLang();
+  return translations[l][key] ?? translations.en[key] ?? key;
+};
+const dateStr = (d: string | Date) => {
+  const locale = { en: 'en-GB', fr: 'fr-FR', de: 'de-DE' }[getLang()];
+  return new Date(d).toLocaleDateString(locale);
+};
 
 export interface ShipmentInfo {
   trackingNumber: string;
@@ -56,20 +73,20 @@ export const generateTicketPdf = async (ticket: Ticket, shipmentInfo?: ShipmentI
   doc.setFontSize(11);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(255, 255, 255);
-  doc.text(isPaid ? 'PAYMENT RECEIPT' : 'INVOICE — DUE', 175, 18, { align: 'center' });
+  doc.text(isPaid ? tr('tk.receiptHeader') : tr('tk.invoiceHeader'), 175, 18, { align: 'center' });
 
   // === TITLE & META ===
   doc.setTextColor(...NAVY);
   doc.setFontSize(17);
   doc.setFont('helvetica', 'bold');
-  doc.text(ticket.title || (isPaid ? 'Payment Receipt' : 'Pending Payment'), 14, 52);
+  doc.text(ticket.title || (isPaid ? tr('tk.paymentReceipt') : tr('tk.pendingPayment')), 14, 52);
 
   doc.setFontSize(9);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(90, 90, 90);
-  doc.text(`Ticket #: ${ticket.ticketNumber}`, 14, 59);
-  doc.text(`Issued: ${new Date(ticket.createdAt).toLocaleDateString()}`, 14, 64);
-  if (ticket.dueDate) doc.text(`Due: ${new Date(ticket.dueDate).toLocaleDateString()}`, 14, 69);
+  doc.text(`${tr('tk.ticketNum')}: ${ticket.ticketNumber}`, 14, 59);
+  doc.text(`${tr('tk.issued')}: ${dateStr(ticket.createdAt)}`, 14, 64);
+  if (ticket.dueDate) doc.text(`${tr('tk.due')}: ${dateStr(ticket.dueDate)}`, 14, 69);
 
   // QR code (top-right)
   try {
@@ -78,7 +95,7 @@ export const generateTicketPdf = async (ticket: Ticket, shipmentInfo?: ShipmentI
     doc.addImage(qrDataUrl, 'PNG', 165, 46, 30, 30);
     doc.setFontSize(7);
     doc.setTextColor(120, 120, 120);
-    doc.text('Scan to track', 180, 79, { align: 'center' });
+    doc.text(tr('tk.scan'), 180, 79, { align: 'center' });
   } catch { /* ignore qr errors */ }
 
   // === BILL TO / SHIPMENT ===
@@ -91,27 +108,27 @@ export const generateTicketPdf = async (ticket: Ticket, shipmentInfo?: ShipmentI
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(9);
   doc.setTextColor(...NAVY);
-  doc.text('BILL TO', 14, y);
-  doc.text('ISSUED BY', 110, y);
+  doc.text(tr('tk.billTo'), 14, y);
+  doc.text(tr('tk.issuedBy'), 110, y);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(50, 50, 50);
   doc.setFontSize(10);
   doc.text(ticket.issuedTo || shipmentInfo?.clientName || '-', 14, y + 6);
-  doc.text(ticket.issuedBy || 'EuroTransit Admin', 110, y + 6);
+  doc.text(ticket.issuedBy || tr('tk.adminName'), 110, y + 6);
 
   if (shipmentInfo) {
     y += 16;
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(9);
     doc.setTextColor(...NAVY);
-    doc.text('SHIPMENT DETAILS', 14, y);
+    doc.text(tr('tk.shipmentDetails'), 14, y);
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(9);
     doc.setTextColor(50, 50, 50);
     y += 6;
-    doc.text(`Tracking #: ${shipmentInfo.trackingNumber}`, 14, y);
+    doc.text(`${tr('tk.tracking')}: ${shipmentInfo.trackingNumber}`, 14, y);
     y += 5;
-    doc.text(`Route: ${shipmentInfo.origin}  ->  ${shipmentInfo.destination}`, 14, y);
+    doc.text(`${tr('tk.route')}: ${shipmentInfo.origin}  ->  ${shipmentInfo.destination}`, 14, y);
   }
 
   // === ITEMS TABLE ===
@@ -121,8 +138,8 @@ export const generateTicketPdf = async (ticket: Ticket, shipmentInfo?: ShipmentI
   doc.setTextColor(255, 255, 255);
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(10);
-  doc.text('DESCRIPTION', 18, y + 6);
-  doc.text('AMOUNT', W - 18, y + 6, { align: 'right' });
+  doc.text(tr('tk.descriptionCol'), 18, y + 6);
+  doc.text(tr('tk.amountCol'), W - 18, y + 6, { align: 'right' });
   y += 12;
 
   doc.setTextColor(50, 50, 50);
@@ -156,14 +173,14 @@ export const generateTicketPdf = async (ticket: Ticket, shipmentInfo?: ShipmentI
     y += bold ? 8 : 6;
   };
 
-  row('Subtotal', `${ticket.currency} ${subtotal.toFixed(2)}`);
-  if (discount > 0) row('Discount', `- ${ticket.currency} ${discount.toFixed(2)}`);
-  if (taxRate > 0) row(`Tax (${taxRate}%)`, `${ticket.currency} ${tax.toFixed(2)}`);
+  row(tr('tk.subtotal'), `${ticket.currency} ${subtotal.toFixed(2)}`);
+  if (discount > 0) row(tr('tk.discount'), `- ${ticket.currency} ${discount.toFixed(2)}`);
+  if (taxRate > 0) row(`${tr('tk.tax')} (${taxRate}%)`, `${ticket.currency} ${tax.toFixed(2)}`);
   doc.setDrawColor(...NAVY);
   doc.setLineWidth(0.5);
   doc.line(W - 90, y - 2, W - 14, y - 2);
   y += 2;
-  row('TOTAL', `${ticket.currency} ${total.toFixed(2)}`, true);
+  row(tr('tk.total').toUpperCase(), `${ticket.currency} ${total.toFixed(2)}`, true);
 
   // === PAYMENT METHOD ===
   if (ticket.paymentMethod) {
@@ -171,7 +188,7 @@ export const generateTicketPdf = async (ticket: Ticket, shipmentInfo?: ShipmentI
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(9);
     doc.setTextColor(...NAVY);
-    doc.text(isPaid ? 'PAYMENT METHOD' : 'PAYMENT INSTRUCTIONS', 14, y);
+    doc.text(isPaid ? tr('tk.pmPaid').toUpperCase() : tr('tk.pmDue').toUpperCase(), 14, y);
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(80, 80, 80);
     const lines = doc.splitTextToSize(ticket.paymentMethod, W - 28);
@@ -185,7 +202,7 @@ export const generateTicketPdf = async (ticket: Ticket, shipmentInfo?: ShipmentI
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(9);
     doc.setTextColor(...NAVY);
-    doc.text('NOTES', 14, y);
+    doc.text(tr('tk.notes').toUpperCase(), 14, y);
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(80, 80, 80);
     const lines = doc.splitTextToSize(ticket.notes, W - 28);
@@ -197,7 +214,7 @@ export const generateTicketPdf = async (ticket: Ticket, shipmentInfo?: ShipmentI
   doc.setFontSize(46);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(...accent);
-  doc.text(isPaid ? 'PAID' : 'UNPAID', 150, 180, { align: 'center', angle: -18 });
+  doc.text(isPaid ? tr('tk.paidStamp') : tr('tk.unpaidStamp'), 150, 180, { align: 'center', angle: -18 });
 
   // === SIGNATURE ===
   doc.setDrawColor(180, 180, 180);
@@ -206,10 +223,10 @@ export const generateTicketPdf = async (ticket: Ticket, shipmentInfo?: ShipmentI
   doc.setFontSize(8);
   doc.setTextColor(120, 120, 120);
   doc.setFont('helvetica', 'normal');
-  doc.text('Authorized Signature', 14, 265);
+  doc.text(tr('tk.authSig'), 14, 265);
 
   doc.line(W - 80, 260, W - 14, 260);
-  doc.text('Client Acknowledgement', W - 80, 265);
+  doc.text(tr('tk.clientAck'), W - 80, 265);
 
   // === FOOTER ===
   doc.setFillColor(...NAVY);
@@ -219,8 +236,8 @@ export const generateTicketPdf = async (ticket: Ticket, shipmentInfo?: ShipmentI
   doc.setFont('helvetica', 'bold');
   doc.text('EuroTransit', 14, 289);
   doc.setFont('helvetica', 'normal');
-  doc.text('Officially issued document — keep for your records.', 14, 294);
-  doc.text(`Page 1 of 1  |  ${new Date().toLocaleDateString()}`, W - 14, 294, { align: 'right' });
+  doc.text(tr('tk.footerDoc'), 14, 294);
+  doc.text(`${dateStr(new Date())}`, W - 14, 294, { align: 'right' });
 
   doc.save(`Ticket-${ticket.ticketNumber}.pdf`);
 };
