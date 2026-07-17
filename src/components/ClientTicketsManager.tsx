@@ -12,6 +12,7 @@ import type { Ticket, TicketItem } from '@/context/AppContext';
 import { generateTicketPdf } from '@/lib/ticketPdf';
 import TicketPreview from './TicketPreview';
 import { useToast } from '@/hooks/use-toast';
+import { useLang } from '@/i18n/LanguageContext';
 
 interface Props {
   clientId: string;
@@ -47,15 +48,16 @@ const newTicketNumber = (type: 'paid' | 'pending') =>
 const ClientTicketsManager: React.FC<Props> = ({ clientId, clientName, trackingCode, origin, destination, initialTickets }) => {
   const { adminInvoke } = useAuth();
   const { toast } = useToast();
+  const { t } = useLang();
   const [tickets, setTickets] = useState<Ticket[]>((initialTickets || []).map(rowToTicket));
   const [open, setOpen] = useState(false);
   const [previewTicket, setPreviewTicket] = useState<Ticket | null>(null);
 
   const [type, setType] = useState<'paid' | 'pending'>('paid');
-  const [title, setTitle] = useState('Transit Fee');
+  const [title, setTitle] = useState(t('tk.defaultTitle'));
   const [currency, setCurrency] = useState('EUR');
   const [notes, setNotes] = useState('');
-  const [items, setItems] = useState<TicketItem[]>([{ description: 'Transit fee', amount: 0 }]);
+  const [items, setItems] = useState<TicketItem[]>([{ description: t('tk.defaultItem'), amount: 0 }]);
   const [dueDate, setDueDate] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('');
   const [taxRate, setTaxRate] = useState(0);
@@ -68,8 +70,8 @@ const ClientTicketsManager: React.FC<Props> = ({ clientId, clientName, trackingC
   const shipmentInfo = { trackingNumber: trackingCode, origin, destination, clientName };
 
   const reset = () => {
-    setType('paid'); setTitle('Transit Fee'); setCurrency('EUR'); setNotes('');
-    setItems([{ description: 'Transit fee', amount: 0 }]);
+    setType('paid'); setTitle(t('tk.defaultTitle')); setCurrency('EUR'); setNotes('');
+    setItems([{ description: t('tk.defaultItem'), amount: 0 }]);
     setDueDate(''); setPaymentMethod(''); setTaxRate(0); setDiscount(0);
   };
 
@@ -79,13 +81,13 @@ const ClientTicketsManager: React.FC<Props> = ({ clientId, clientName, trackingC
       shipmentId: clientId,
       ticketNumber: newTicketNumber(type),
       ticketType: type,
-      title: title || (type === 'paid' ? 'Payment Receipt' : 'Pending Payment'),
+      title: title || (type === 'paid' ? t('tk.paymentReceipt') : t('tk.pendingPayment')),
       amount: Number(total.toFixed(2)),
       currency,
       items: items.filter(i => i.description.trim()),
       notes,
       issuedTo: clientName,
-      issuedBy: 'EuroTransit Admin',
+      issuedBy: t('tk.adminName'),
       createdAt: new Date().toISOString(),
       dueDate: dueDate || undefined,
       paymentMethod,
@@ -111,7 +113,7 @@ const ClientTicketsManager: React.FC<Props> = ({ clientId, clientName, trackingC
       });
       const saved = res?.ticket ? rowToTicket(res.ticket) : ticket;
       setTickets(prev => [saved, ...prev]);
-      toast({ title: 'Ticket created', description: saved.ticketNumber });
+      toast({ title: t('tk.created'), description: saved.ticketNumber });
       setOpen(false); reset();
       setPreviewTicket(saved);
     } catch (e) {
@@ -119,46 +121,46 @@ const ClientTicketsManager: React.FC<Props> = ({ clientId, clientName, trackingC
     }
   };
 
-  const remove = async (t: Ticket) => {
+  const remove = async (tk: Ticket) => {
     try {
-      await adminInvoke('deleteTicket', { id: t.id });
-      setTickets(prev => prev.filter(x => x.id !== t.id));
+      await adminInvoke('deleteTicket', { id: tk.id });
+      setTickets(prev => prev.filter(x => x.id !== tk.id));
     } catch {
       toast({ title: 'Failed to delete ticket', variant: 'destructive' });
     }
   };
 
-  const download = async (t: Ticket) => {
-    try { await generateTicketPdf(t, shipmentInfo); }
+  const download = async (tk: Ticket) => {
+    try { await generateTicketPdf(tk, shipmentInfo); }
     catch (e) { console.error(e); toast({ title: 'PDF error', description: String(e), variant: 'destructive' }); }
   };
 
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle className="text-base flex items-center gap-2"><Receipt className="w-4 h-4" /> Tickets & Invoices</CardTitle>
+        <CardTitle className="text-base flex items-center gap-2"><Receipt className="w-4 h-4" /> {t('tk.section')}</CardTitle>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button size="sm" className="gap-1 bg-secondary text-secondary-foreground hover:bg-secondary/90">
-              <Plus className="w-3 h-3" /> New Ticket
+              <Plus className="w-3 h-3" /> {t('tk.new')}
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
-            <DialogHeader><DialogTitle>Create Professional Ticket</DialogTitle></DialogHeader>
+            <DialogHeader><DialogTitle>{t('tk.dlgTitle')}</DialogTitle></DialogHeader>
             <div className="space-y-3">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-sm font-medium">Type</label>
+                  <label className="text-sm font-medium">{t('tk.type')}</label>
                   <Select value={type} onValueChange={v => setType(v as 'paid' | 'pending')}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="paid">Payment Receipt (Paid)</SelectItem>
-                      <SelectItem value="pending">Invoice (Due)</SelectItem>
+                      <SelectItem value="paid">{t('tk.optReceipt')}</SelectItem>
+                      <SelectItem value="pending">{t('tk.optInvoice')}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div>
-                  <label className="text-sm font-medium">Currency</label>
+                  <label className="text-sm font-medium">{t('tk.currency')}</label>
                   <Select value={currency} onValueChange={setCurrency}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
@@ -168,25 +170,25 @@ const ClientTicketsManager: React.FC<Props> = ({ clientId, clientName, trackingC
                 </div>
               </div>
               <div>
-                <label className="text-sm font-medium">Title</label>
-                <Input value={title} onChange={e => setTitle(e.target.value)} placeholder="e.g. Transit Fee Receipt" />
+                <label className="text-sm font-medium">{t('tk.title')}</label>
+                <Input value={title} onChange={e => setTitle(e.target.value)} placeholder={t('tk.titlePh')} />
               </div>
 
               {type === 'pending' && (
                 <div>
-                  <label className="text-sm font-medium">Due Date</label>
+                  <label className="text-sm font-medium">{t('tk.dueDate')}</label>
                   <Input type="date" value={dueDate} onChange={e => setDueDate(e.target.value)} />
                 </div>
               )}
 
               <div>
-                <label className="text-sm font-medium">Items</label>
+                <label className="text-sm font-medium">{t('tk.items')}</label>
                 <div className="space-y-2 mt-1">
                   {items.map((it, idx) => (
                     <div key={idx} className="flex gap-2">
-                      <Input className="flex-1" placeholder="Description" value={it.description}
+                      <Input className="flex-1" placeholder={t('tk.descPh')} value={it.description}
                         onChange={e => setItems(arr => arr.map((x, i) => i === idx ? { ...x, description: e.target.value } : x))} />
-                      <Input type="number" className="w-28" placeholder="Amount" value={it.amount}
+                      <Input type="number" className="w-28" placeholder={t('tk.amountPh')} value={it.amount}
                         onChange={e => setItems(arr => arr.map((x, i) => i === idx ? { ...x, amount: Number(e.target.value) } : x))} />
                       <Button type="button" variant="ghost" size="icon" onClick={() => setItems(arr => arr.filter((_, i) => i !== idx))}>
                         <Trash2 className="w-3.5 h-3.5" />
@@ -194,42 +196,42 @@ const ClientTicketsManager: React.FC<Props> = ({ clientId, clientName, trackingC
                     </div>
                   ))}
                   <Button type="button" variant="outline" size="sm" onClick={() => setItems(arr => [...arr, { description: '', amount: 0 }])}>
-                    <Plus className="w-3 h-3 mr-1" /> Add line
+                    <Plus className="w-3 h-3 mr-1" /> {t('tk.addLine')}
                   </Button>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-sm font-medium">Discount</label>
+                  <label className="text-sm font-medium">{t('tk.discount')}</label>
                   <Input type="number" value={discount} onChange={e => setDiscount(Number(e.target.value) || 0)} />
                 </div>
                 <div>
-                  <label className="text-sm font-medium">Tax %</label>
+                  <label className="text-sm font-medium">{t('tk.taxPct')}</label>
                   <Input type="number" value={taxRate} onChange={e => setTaxRate(Number(e.target.value) || 0)} />
                 </div>
               </div>
 
               <div className="rounded-lg bg-muted/50 p-3 space-y-1 text-sm">
-                <div className="flex justify-between"><span>Subtotal</span><span>{currency} {subtotal.toFixed(2)}</span></div>
-                {discount > 0 && <div className="flex justify-between text-destructive"><span>Discount</span><span>- {currency} {discount.toFixed(2)}</span></div>}
-                {taxRate > 0 && <div className="flex justify-between"><span>Tax ({taxRate}%)</span><span>{currency} {taxAmt.toFixed(2)}</span></div>}
-                <div className="flex justify-between font-bold text-base pt-1 border-t"><span>Total</span><span className="text-secondary">{currency} {total.toFixed(2)}</span></div>
+                <div className="flex justify-between"><span>{t('tk.subtotal')}</span><span>{currency} {subtotal.toFixed(2)}</span></div>
+                {discount > 0 && <div className="flex justify-between text-destructive"><span>{t('tk.discount')}</span><span>- {currency} {discount.toFixed(2)}</span></div>}
+                {taxRate > 0 && <div className="flex justify-between"><span>{t('tk.tax')} ({taxRate}%)</span><span>{currency} {taxAmt.toFixed(2)}</span></div>}
+                <div className="flex justify-between font-bold text-base pt-1 border-t"><span>{t('tk.total')}</span><span className="text-secondary">{currency} {total.toFixed(2)}</span></div>
               </div>
 
               <div>
-                <label className="text-sm font-medium">{type === 'paid' ? 'Payment Method' : 'Payment Instructions'}</label>
+                <label className="text-sm font-medium">{type === 'paid' ? t('tk.pmPaid') : t('tk.pmDue')}</label>
                 <Textarea value={paymentMethod} onChange={e => setPaymentMethod(e.target.value)}
-                  placeholder={type === 'paid' ? 'e.g. Bank Transfer, Card ending 4242' : 'e.g. Bank: ABC Bank · IBAN: ...'} rows={2} />
+                  placeholder={type === 'paid' ? t('tk.pmPhPaid') : t('tk.pmPhDue')} rows={2} />
               </div>
 
               <div>
-                <label className="text-sm font-medium">Notes</label>
-                <Textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder="Additional notes..." rows={2} />
+                <label className="text-sm font-medium">{t('tk.notes')}</label>
+                <Textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder={t('tk.notesPh')} rows={2} />
               </div>
 
               <Button onClick={handleCreate} className="w-full bg-secondary text-secondary-foreground hover:bg-secondary/90">
-                Create Ticket
+                {t('tk.create')}
               </Button>
             </div>
           </DialogContent>
@@ -237,31 +239,31 @@ const ClientTicketsManager: React.FC<Props> = ({ clientId, clientName, trackingC
       </CardHeader>
       <CardContent>
         {tickets.length === 0 ? (
-          <p className="text-sm text-muted-foreground text-center py-4">No tickets yet. Create a payment receipt or pending invoice.</p>
+          <p className="text-sm text-muted-foreground text-center py-4">{t('tk.none')}</p>
         ) : (
           <div className="space-y-2">
-            {tickets.map(t => (
-              <div key={t.id} className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/30">
+            {tickets.map(tk => (
+              <div key={tk.id} className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/30">
                 <div className="flex items-center gap-3 min-w-0">
                   <FileText className="w-5 h-5 text-secondary flex-shrink-0" />
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="font-medium text-sm truncate">{t.title}</span>
-                      <Badge className={t.ticketType === 'paid' ? 'bg-success text-success-foreground' : 'bg-warning text-warning-foreground'}>
-                        {t.ticketType === 'paid' ? 'PAID' : 'DUE'}
+                      <span className="font-medium text-sm truncate">{tk.title}</span>
+                      <Badge className={tk.ticketType === 'paid' ? 'bg-success text-success-foreground' : 'bg-warning text-warning-foreground'}>
+                        {tk.ticketType === 'paid' ? t('tk.badgePaid') : t('tk.badgeDue')}
                       </Badge>
                     </div>
-                    <div className="text-xs text-muted-foreground font-mono">{t.ticketNumber} · {t.currency} {t.amount.toFixed(2)}</div>
+                    <div className="text-xs text-muted-foreground font-mono">{tk.ticketNumber} · {tk.currency} {tk.amount.toFixed(2)}</div>
                   </div>
                 </div>
                 <div className="flex gap-1">
-                  <Button variant="ghost" size="icon" className="h-8 w-8" title="Preview" onClick={() => setPreviewTicket(t)}>
+                  <Button variant="ghost" size="icon" className="h-8 w-8" title={t('tk.preview')} onClick={() => setPreviewTicket(tk)}>
                     <Eye className="w-4 h-4" />
                   </Button>
-                  <Button variant="ghost" size="icon" className="h-8 w-8" title="Download PDF" onClick={() => download(t)}>
+                  <Button variant="ghost" size="icon" className="h-8 w-8" title={t('tk.download')} onClick={() => download(tk)}>
                     <Download className="w-4 h-4" />
                   </Button>
-                  <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" title="Delete" onClick={() => remove(t)}>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" title={t('tk.delete')} onClick={() => remove(tk)}>
                     <Trash2 className="w-4 h-4" />
                   </Button>
                 </div>
