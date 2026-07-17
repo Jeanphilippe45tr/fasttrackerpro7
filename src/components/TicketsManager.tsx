@@ -81,8 +81,8 @@ const TicketsManager: React.FC<Props> = ({ shipment }) => {
     clientName: shipment.clientName,
   };
 
-  const download = async (t: Ticket) => {
-    try { await generateTicketPdf(t, shipmentInfo); }
+  const download = async (tk: Ticket) => {
+    try { await generateTicketPdf(tk, shipmentInfo); }
     catch (e) { console.error(e); toast({ title: 'PDF error', description: String(e), variant: 'destructive' }); }
   };
 
