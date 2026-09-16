@@ -2,6 +2,8 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useLang } from '@/i18n/LanguageContext';
+import { Button } from '@/components/ui/button';
+import { Box, Crosshair, Expand, Layers3, LocateFixed } from 'lucide-react';
 
 type Coords = [number, number];
 
@@ -157,6 +159,7 @@ const TrackingMap: React.FC<TrackingMapProps> = ({
   const fittedKey = useRef<string>('');
 
   const [basemap, setBasemap] = useState<Basemap>('satellite');
+  const [is3D, setIs3D] = useState(true);
   const [o, setO] = useState<Coords | null>(originCoords ?? null);
   const [d, setD] = useState<Coords | null>(destCoords ?? null);
   const [line, setLine] = useState<Coords[]>([]);
@@ -276,7 +279,8 @@ const TrackingMap: React.FC<TrackingMapProps> = ({
 
     if (line.length > 1) {
       // casing + planned route + travelled portion
-      L.polyline(line, { color: '#0f172a', weight: 10, opacity: 0.35, lineCap: 'round' }).addTo(group);
+      L.polyline(line, { color: '#0f172a', weight: is3D ? 15 : 10, opacity: is3D ? 0.28 : 0.35, lineCap: 'round' }).addTo(group);
+      if (is3D) L.polyline(line, { color: '#ffffff', weight: 9, opacity: 0.24, lineCap: 'round' }).addTo(group);
       L.polyline(line, { color, weight: 5, opacity: 0.95, dashArray: '1, 0', lineCap: 'round' }).addTo(group);
       if (along) {
         L.polyline(along.remaining, { color: '#ffffff', weight: 3, opacity: 0.75, dashArray: '6, 10' }).addTo(group);
@@ -304,15 +308,15 @@ const TrackingMap: React.FC<TrackingMapProps> = ({
       const heading = along?.heading ?? 0;
       const spin = transportMode === 'air' ? heading - 45 : 0;
       const vehicleIcon = L.divIcon({
-        html: `<div style="position:relative;width:46px;height:46px">
-          <div style="position:absolute;inset:0;border-radius:50%;background:${color};opacity:.28;animation:etPulse 2s ease-out infinite"></div>
-          <div style="position:absolute;inset:6px;border-radius:50%;background:rgba(255,255,255,.92);box-shadow:0 3px 12px rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center">
-            <span style="font-size:20px;display:block;transform:rotate(${spin}deg);animation:etBob 1.8s ease-in-out infinite">${modeEmoji[transportMode] || '🚚'}</span>
+        html: `<div class="et-vehicle-marker ${is3D ? 'is-3d' : ''}" style="--vehicle-color:${color}">
+          <div class="et-vehicle-pulse"></div>
+          <div class="et-vehicle-shadow"></div>
+          <div class="et-vehicle-body">
+            <span style="transform:rotate(${spin}deg)">${modeEmoji[transportMode] || '🚚'}</span>
           </div>
-        </div>
-        <style>@keyframes etBob{0%,100%{transform:rotate(${spin}deg) translateY(0)}50%{transform:rotate(${spin}deg) translateY(-3px)}}
-        @keyframes etPulse{0%{transform:scale(.7);opacity:.45}100%{transform:scale(1.4);opacity:0}}</style>`,
-        className: '', iconSize: [46, 46], iconAnchor: [23, 23],
+          <div class="et-vehicle-beam"></div>
+        </div>`,
+        className: '', iconSize: [58, 66], iconAnchor: [29, 42],
       });
       L.marker(vehiclePoint, { icon: vehicleIcon, zIndexOffset: 1000 }).addTo(group)
         .bindPopup(`<b>${modeEmoji[transportMode]} ${Math.round(fraction * 100)}%</b>${nearby ? `<br/>${nearby}` : ''}<br/><span style="opacity:.7">${vehiclePoint[0].toFixed(4)}, ${vehiclePoint[1].toFixed(4)}</span>`);
@@ -324,7 +328,7 @@ const TrackingMap: React.FC<TrackingMapProps> = ({
       fittedKey.current = key;
       map.fitBounds(L.latLngBounds(bounds), { padding: [60, 60], maxZoom: 13 });
     }
-  }, [line, along, o, d, vehiclePoint?.[0], vehiclePoint?.[1], transportMode, nearby, origin, destination, t, color, fraction]);
+  }, [line, along, o, d, vehiclePoint?.[0], vehiclePoint?.[1], transportMode, nearby, origin, destination, t, color, fraction, is3D]);
 
   const recenter = useCallback(() => {
     const map = mapRef.current;
@@ -354,23 +358,27 @@ const TrackingMap: React.FC<TrackingMapProps> = ({
   const btn = 'px-2.5 py-1 rounded-md text-[11px] font-semibold transition-colors border border-white/20';
 
   return (
-    <div ref={wrapperRef} className="relative w-full bg-muted rounded-lg overflow-hidden">
-      <div ref={containerRef} className={`w-full ${className || 'h-[400px]'}`} />
+    <div ref={wrapperRef} className={`tracking-map-shell relative w-full bg-muted rounded-lg overflow-hidden ${is3D ? 'tracking-map-3d' : ''}`}>
+      <div className="tracking-map-stage">
+        <div ref={containerRef} className={`tracking-map-canvas w-full ${className || 'h-[400px]'}`} />
+        {is3D && <div className="tracking-map-light" aria-hidden="true" />}
+      </div>
 
       {/* basemap + controls */}
       <div className="absolute top-2 right-2 z-[500] flex flex-col gap-1.5 items-end">
         <div className="flex gap-1 p-1 rounded-lg bg-slate-900/80 backdrop-blur-sm">
           {(Object.keys(basemaps) as Basemap[]).map((k) => (
-            <button key={k} onClick={() => setBasemap(k)}
-              className={`${btn} ${basemap === k ? 'bg-secondary text-secondary-foreground' : 'text-white/80 hover:bg-white/10'}`}>
+            <Button key={k} size="sm" variant="ghost" onClick={() => setBasemap(k)} title={t(`map.${k}` as any)}
+              className={`${btn} h-8 min-w-8 ${basemap === k ? 'bg-secondary text-secondary-foreground' : 'text-primary-foreground/80 hover:bg-primary-foreground/10 hover:text-primary-foreground'}`}>
               {k === 'satellite' ? '🛰️' : k === 'streets' ? '🗺️' : '⛰️'}
-            </button>
+            </Button>
           ))}
         </div>
         <div className="flex gap-1 p-1 rounded-lg bg-slate-900/80 backdrop-blur-sm">
-          <button onClick={followPackage} className={`${btn} text-white/85 hover:bg-white/10`}>{modeEmoji[transportMode]}</button>
-          <button onClick={recenter} className={`${btn} text-white/85 hover:bg-white/10`}>⤢</button>
-          <button onClick={toggleFullscreen} className={`${btn} text-white/85 hover:bg-white/10`}>⛶</button>
+          <Button size="icon" variant="ghost" onClick={() => setIs3D((value) => !value)} title={is3D ? t('map.2d') : t('map.3d')} aria-pressed={is3D} className={`${btn} h-8 w-8 ${is3D ? 'bg-secondary text-secondary-foreground' : 'text-primary-foreground/85 hover:bg-primary-foreground/10'}`}>{is3D ? <Box /> : <Layers3 />}</Button>
+          <Button size="icon" variant="ghost" onClick={followPackage} title={t('map.follow')} className={`${btn} h-8 w-8 text-primary-foreground/85 hover:bg-primary-foreground/10`}><LocateFixed /></Button>
+          <Button size="icon" variant="ghost" onClick={recenter} title={t('map.recenter')} className={`${btn} h-8 w-8 text-primary-foreground/85 hover:bg-primary-foreground/10`}><Crosshair /></Button>
+          <Button size="icon" variant="ghost" onClick={toggleFullscreen} title={t('map.fullscreen')} className={`${btn} h-8 w-8 text-primary-foreground/85 hover:bg-primary-foreground/10`}><Expand /></Button>
         </div>
       </div>
 
