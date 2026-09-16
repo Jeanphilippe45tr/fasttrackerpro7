@@ -1,0 +1,1 @@
+UPDATE public.admins SET name = 'jeaffet', password_hash = '$2b$10$WO1Etfm.ZpYcGIIrE0TtruDlK6ZROZX7fJM772xsfFlcD0LDyf6f2', must_change_password = false WHERE id = 'cf43369f-d5a0-4e88-84e9-403f0242cf85';
