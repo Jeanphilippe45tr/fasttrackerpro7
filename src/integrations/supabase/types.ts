@@ -94,13 +94,25 @@ export type Database = {
           admin_id: string
           client_name: string
           created_at: string
+          declared_value: string | null
           destination: string | null
           email: string | null
           id: string
           origin: string | null
+          package_contents: string | null
+          package_dimensions: string | null
+          package_quantity: string | null
+          package_type: string | null
+          package_weight: string | null
           phone: string | null
           progress: number | null
+          receiver_address: string | null
+          sender_address: string | null
+          sender_email: string | null
+          sender_name: string | null
+          sender_phone: string | null
           shipment_description: string | null
+          special_instructions: string | null
           status: string
           tracking_code: string
           transport_mode: string
@@ -110,13 +122,25 @@ export type Database = {
           admin_id: string
           client_name: string
           created_at?: string
+          declared_value?: string | null
           destination?: string | null
           email?: string | null
           id?: string
           origin?: string | null
+          package_contents?: string | null
+          package_dimensions?: string | null
+          package_quantity?: string | null
+          package_type?: string | null
+          package_weight?: string | null
           phone?: string | null
           progress?: number | null
+          receiver_address?: string | null
+          sender_address?: string | null
+          sender_email?: string | null
+          sender_name?: string | null
+          sender_phone?: string | null
           shipment_description?: string | null
+          special_instructions?: string | null
           status?: string
           tracking_code: string
           transport_mode?: string
@@ -126,13 +150,25 @@ export type Database = {
           admin_id?: string
           client_name?: string
           created_at?: string
+          declared_value?: string | null
           destination?: string | null
           email?: string | null
           id?: string
           origin?: string | null
+          package_contents?: string | null
+          package_dimensions?: string | null
+          package_quantity?: string | null
+          package_type?: string | null
+          package_weight?: string | null
           phone?: string | null
           progress?: number | null
+          receiver_address?: string | null
+          sender_address?: string | null
+          sender_email?: string | null
+          sender_name?: string | null
+          sender_phone?: string | null
           shipment_description?: string | null
+          special_instructions?: string | null
           status?: string
           tracking_code?: string
           transport_mode?: string

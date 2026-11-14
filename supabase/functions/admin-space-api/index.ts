@@ -82,6 +82,12 @@ async function generateTrackingCode(supabase: any, prefix: string) {
 
 const STATUSES = ['pending', 'in_transit', 'delivered', 'failed']
 const MODES = ['road', 'sea', 'air', 'rail']
+const EXTRA = ['sender_name','sender_phone','sender_email','sender_address','receiver_address','package_weight','package_dimensions','package_type','package_quantity','declared_value','package_contents','special_instructions']
+function pickExtra(d: any, all: boolean) {
+  const out: Record<string, string> = {}
+  for (const k of EXTRA) if (all || d?.[k] !== undefined) out[k] = String(d?.[k] ?? '').slice(0, 1000)
+  return out
+}
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
@@ -155,6 +161,7 @@ Deno.serve(async (req) => {
           destination: String(data?.destination ?? ''),
           status,
           transport_mode: transportMode,
+          ...pickExtra(data, true),
         }).select('*').single()
         if (error) throw error
         await supabase.from('tracking_events').insert({
@@ -177,6 +184,7 @@ Deno.serve(async (req) => {
         if (data?.destination !== undefined) updates.destination = String(data.destination)
         if (data?.status !== undefined && STATUSES.includes(data.status)) updates.status = data.status
         if (data?.transportMode !== undefined && MODES.includes(data.transportMode)) updates.transport_mode = data.transportMode
+        Object.assign(updates, pickExtra(data, false))
         if (data?.progress !== undefined) {
           const p = Math.max(0, Math.min(100, Math.round(Number(data.progress) || 0)))
           updates.progress = p

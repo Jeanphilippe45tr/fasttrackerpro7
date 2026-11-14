@@ -1,3 +1,4 @@
+import ShipmentExtraFields, { EXTRA_FIELDS } from '@/components/ShipmentExtraFields';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
@@ -107,6 +108,7 @@ const ClientDetail: React.FC = () => {
         status: client.status,
         progress: client.progress ?? 0,
         transportMode: client.transport_mode ?? 'road',
+        ...Object.fromEntries(EXTRA_FIELDS.map((k) => [k, client[k] ?? ''])),
       });
       toast({ title: t('cd.saved') });
     } catch {
@@ -194,6 +196,7 @@ const ClientDetail: React.FC = () => {
             </div>
           </div>
           <div className="space-y-2"><Label>{t('nc.description')}</Label><Textarea value={client.shipment_description || ''} onChange={setField('shipment_description')} rows={3} /></div>
+          <ShipmentExtraFields values={client} onChange={(k, v) => setClient((c: any) => ({ ...c, [k]: v }))} />
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <Label>{t('cd.progress')}</Label>

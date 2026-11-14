@@ -15,13 +15,14 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, Loader2, Copy, CheckCircle2 } from 'lucide-react';
 import { useLang } from '@/i18n/LanguageContext';
+import ShipmentExtraFields from '@/components/ShipmentExtraFields';
 
 const NewClient: React.FC = () => {
   const { adminInvoke } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const { t } = useLang();
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<Record<string, string>>({
     clientName: '', phone: '', email: '', shipmentDescription: '',
     origin: '', destination: '', status: 'pending', transportMode: 'road',
   });
@@ -103,6 +104,7 @@ const NewClient: React.FC = () => {
               <Label htmlFor="desc">{t('nc.description')}</Label>
               <Textarea id="desc" value={form.shipmentDescription} onChange={set('shipmentDescription')} rows={3} />
             </div>
+            <ShipmentExtraFields values={form} onChange={(k, v) => setForm((f) => ({ ...f, [k]: v }))} />
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : t('nc.create')}
             </Button>
