@@ -21,6 +21,15 @@ export interface Shipment {
   weight: string;
   dimensions: string;
   packageType: string;
+  senderName?: string;
+  senderPhone?: string;
+  senderEmail?: string;
+  senderAddress?: string;
+  receiverAddress?: string;
+  packageQuantity?: string;
+  declaredValue?: string;
+  packageContents?: string;
+  specialInstructions?: string;
   route: [number, number][];
   history: ShipmentEvent[];
 }
@@ -122,9 +131,18 @@ const rowToShipment = (row: any): Shipment => ({
   estimatedArrival: row.estimated_arrival || '',
   createdAt: row.created_at?.split('T')[0] || '',
   updatedAt: row.updated_at?.split('T')[0] || '',
-  weight: row.weight || '',
-  dimensions: row.dimensions || '',
+  weight: row.package_weight || row.weight || '',
+  dimensions: row.package_dimensions || row.dimensions || '',
   packageType: row.package_type || 'Standard Box',
+  senderName: row.sender_name || '',
+  senderPhone: row.sender_phone || '',
+  senderEmail: row.sender_email || '',
+  senderAddress: row.sender_address || '',
+  receiverAddress: row.receiver_address || '',
+  packageQuantity: row.package_quantity || '',
+  declaredValue: row.declared_value || '',
+  packageContents: row.package_contents || '',
+  specialInstructions: row.special_instructions || '',
   route: (row.route as [number, number][]) || [],
   history: (row.history as ShipmentEvent[]) || [],
 });
@@ -371,9 +389,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         estimatedArrival: '',
         createdAt: (c.created_at || '').split('T')[0] || '',
         updatedAt: (c.updated_at || '').split('T')[0] || '',
-        weight: '',
-        dimensions: '',
-        packageType: c.shipment_description || 'Standard Box',
+        weight: c.package_weight || '',
+        dimensions: c.package_dimensions || '',
+        packageType: c.package_type || c.shipment_description || 'Standard Box',
+        senderName: c.sender_name || '',
+        senderPhone: c.sender_phone || '',
+        senderEmail: c.sender_email || '',
+        senderAddress: c.sender_address || '',
+        receiverAddress: c.receiver_address || '',
+        packageQuantity: c.package_quantity || '',
+        declaredValue: c.declared_value || '',
+        packageContents: c.package_contents || '',
+        specialInstructions: c.special_instructions || '',
         route: [],
         history: (res.events ?? []).map((ev: any) => ({
           id: `${ev.event_time}-${ev.event_description}`,

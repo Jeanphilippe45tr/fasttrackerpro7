@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Search, Package, MapPin, Clock, AlertCircle, CheckCircle, Pause, MessageSquare, Download, FileText, Eye } from 'lucide-react';
+import { Search, Package, MapPin, Clock, AlertCircle, CheckCircle, Pause, MessageSquare, Download, FileText, Eye, UserRound } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -22,6 +22,16 @@ const statusConfig: Record<string, { color: string; icon: React.ElementType; lab
   paused: { color: 'bg-destructive text-destructive-foreground', icon: Pause, label: 'On Hold' },
   delivered: { color: 'bg-success text-success-foreground', icon: CheckCircle, label: 'Delivered' },
   cancelled: { color: 'bg-muted text-muted-foreground', icon: AlertCircle, label: 'Cancelled' },
+};
+
+const DetailRow: React.FC<{ label: string; value?: string }> = ({ label, value }) => {
+  if (!value) return null;
+  return (
+    <div className="flex items-start justify-between gap-4">
+      <span className="text-muted-foreground shrink-0">{label}</span>
+      <span className="font-medium text-foreground text-right break-words max-w-[60%]">{value}</span>
+    </div>
+  );
 };
 
 const TrackPage: React.FC = () => {
@@ -196,17 +206,41 @@ const TrackPage: React.FC = () => {
                 </CardContent>
               </Card>
 
+              {/* Sender and recipient details supplied by the admin */}
+              {[shipment.senderName, shipment.senderPhone, shipment.senderEmail, shipment.senderAddress, shipment.receiverAddress].some(Boolean) && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center gap-2"><UserRound className="w-5 h-5 text-secondary" />{t('sx.senderTitle')}</CardTitle>
+                  </CardHeader>
+                  <CardContent className="grid sm:grid-cols-2 gap-x-8 gap-y-3 text-sm">
+                    <DetailRow label={t('sx.sender_name')} value={shipment.senderName} />
+                    <DetailRow label={t('sx.sender_phone')} value={shipment.senderPhone} />
+                    <DetailRow label={t('sx.sender_email')} value={shipment.senderEmail} />
+                    <DetailRow label={t('sx.sender_address')} value={shipment.senderAddress} />
+                    {shipment.receiverAddress && (
+                      <div className="sm:col-span-2">
+                        <DetailRow label={t('sx.receiver_address')} value={shipment.receiverAddress} />
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
+
               {/* Details */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <Card>
                   <CardHeader><CardTitle className="text-lg">{t('track.pkgDetails')}</CardTitle></CardHeader>
                   <CardContent className="space-y-3 text-sm">
-                    <div className="flex justify-between"><span className="text-muted-foreground">{t('track.client')}</span><span className="font-medium text-foreground">{shipment.clientName}</span></div>
-                    <div className="flex justify-between"><span className="text-muted-foreground">{t('track.weight')}</span><span className="font-medium text-foreground">{shipment.weight}</span></div>
-                    <div className="flex justify-between"><span className="text-muted-foreground">{t('track.dimensions')}</span><span className="font-medium text-foreground">{shipment.dimensions}</span></div>
-                    <div className="flex justify-between"><span className="text-muted-foreground">{t('track.type')}</span><span className="font-medium text-foreground">{shipment.packageType}</span></div>
-                    <div className="flex justify-between"><span className="text-muted-foreground">{t('track.transport')}</span><span className="font-medium text-foreground">{transportLabel}</span></div>
-                    <div className="flex justify-between"><span className="text-muted-foreground">{t('track.created')}</span><span className="font-medium text-foreground">{shipment.createdAt}</span></div>
+                    <DetailRow label={t('track.client')} value={shipment.clientName} />
+                    <DetailRow label={t('track.weight')} value={shipment.weight} />
+                    <DetailRow label={t('track.dimensions')} value={shipment.dimensions} />
+                    <DetailRow label={t('track.type')} value={shipment.packageType} />
+                    <DetailRow label={t('sx.package_quantity')} value={shipment.packageQuantity} />
+                    <DetailRow label={t('sx.declared_value')} value={shipment.declaredValue} />
+                    <DetailRow label={t('sx.package_contents')} value={shipment.packageContents} />
+                    <DetailRow label={t('sx.special_instructions')} value={shipment.specialInstructions} />
+                    <DetailRow label={t('track.transport')} value={transportLabel} />
+                    <DetailRow label={t('track.created')} value={shipment.createdAt} />
                   </CardContent>
                 </Card>
 
