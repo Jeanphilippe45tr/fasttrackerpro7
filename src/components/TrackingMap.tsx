@@ -33,7 +33,7 @@ async function geocode(query: string): Promise<Coords | null> {
   if (geocodeCache.has(key)) return geocodeCache.get(key)!;
   try {
     const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(query)}`;
-    const res = await fetch(url, { headers: { 'Accept-Language': 'en' } });
+    const res = await fetch(url, { headers: { 'Accept-Language': 'fr,en,de' } });
     const data = await res.json();
     const result: Coords | null = data?.[0] ? [parseFloat(data[0].lat), parseFloat(data[0].lon)] : null;
     geocodeCache.set(key, result);
@@ -129,12 +129,12 @@ const basemaps = {
     url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
     attribution: 'Tiles © Esri — Source: Esri, Maxar, Earthstar Geographics',
     maxZoom: 19,
-    labels: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}{r}.png',
+    labels: 'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',
   },
   streets: {
-    url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
-    attribution: '© OpenStreetMap contributors © CARTO',
-    maxZoom: 20,
+    url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+    attribution: '© OpenStreetMap contributors',
+    maxZoom: 19,
     labels: null as string | null,
   },
   terrain: {
@@ -173,12 +173,11 @@ const TrackingMap: React.FC<TrackingMapProps> = ({
   useEffect(() => {
     let active = true;
     (async () => {
-      if (originCoords) setO(originCoords);
-      else if (origin) { const c = await geocode(origin); if (active) setO(c); }
-      else setO(null);
-      if (destCoords) setD(destCoords);
-      else if (destination) { const c = await geocode(destination); if (active) setD(c); }
-      else setD(null);
+      // Always trust the place name the admin typed; stored coords are only a fallback.
+      const oc = origin ? await geocode(origin) : null;
+      if (active) setO(oc || originCoords || null);
+      const dc = destination ? await geocode(destination) : null;
+      if (active) setD(dc || destCoords || null);
     })();
     return () => { active = false; };
   }, [origin, destination, originCoords, destCoords]);
@@ -209,7 +208,7 @@ const TrackingMap: React.FC<TrackingMapProps> = ({
   }, [o, d, transportMode]);
 
   const along = useMemo(() => (line.length ? pointAlong(line, fraction) : null), [line, fraction]);
-  const vehiclePoint = currentCoords || along?.point || null;
+  const vehiclePoint = along?.point || currentCoords || null;
 
   const totalKm = along ? along.total / 1000 : 0;
   const remainingKm = totalKm * (1 - fraction);
